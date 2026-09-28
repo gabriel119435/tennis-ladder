@@ -1,0 +1,10 @@
+# general
+.idea
+.DS_Store
+
+# be auto-generated
+__pycache__/
+# be tooling
+backend/.venv
+# be local data
+backend/app.db
