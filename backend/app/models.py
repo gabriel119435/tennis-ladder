@@ -13,8 +13,12 @@ class AuthAdmin(UserMixin):  # session detached information about current databa
     username: str
     password_hash: str
 
+    @classmethod
+    def from_admin(cls, admin):
+        return cls(id=admin.id, username=admin.username, password_hash=admin.password_hash)
 
-class Admin(UserMixin, Base):  # database row
+
+class Admin(Base):  # database row
     __tablename__ = "admins"
 
     id: Mapped[int] = mapped_column(primary_key=True)

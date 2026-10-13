@@ -11,10 +11,10 @@ only admins log in.
 every ranking, every round, every match, every result and every standing is public, visible without a session.
 new admin accounts are created only manually, out of band.
 
-| who    | can do                                                                                                   |
-|--------|----------------------------------------------------------------------------------------------------------|
-| admin  | logs in; creates and renames players, creates rankings, manages participants and rounds, upserts results |
-| public | (no account) views every ranking, round, match, result and standing                                      |
+| who    | can do                                                                                                |
+|--------|-------------------------------------------------------------------------------------------------------|
+| admin  | creates and renames players, creates rankings, manages participants and rounds, enters/clears results |
+| public | (no account) views every ranking, round, match, result and standing                                   |
 
 a player is not an account: an admin creates one as a name only, no password.
 a player exists only as something matches and registrations point to.
@@ -25,7 +25,7 @@ different admins can each have their own player of the same name.
 
 players and rankings belong to the admin who created them.
 an admin can only register a player into a ranking when they own both.
-an admin can only rename a player, or start/close a ranking or edit its participants/results if they own it.
+only the owning admin can rename a player, start/close a ranking, edit its participants or enter/clear its results.
 anyone can still view any ranking's standings, rounds and players.
 players, matches and rankings are never hard deleted.
 
@@ -68,7 +68,8 @@ pairing must stay mutual: if A's selection includes B, B's selection must includ
 
 ## match
 
-- results can only be upserted while their round is the ranking's open current round.
+- a result is entered once and never edited, only cleared and re-entered.
+- entering or clearing a result only works while its round is the ranking's open current round.
 - best of 3 sets: 2-0, or 1-1 decided by a super tiebreak of 10 points.
 - 6-6 set is decided by a regular tiebreak: first to 7, win by 2. recorded as 7-6.
 

@@ -4,14 +4,14 @@ from werkzeug.security import generate_password_hash
 
 from app.db import get_session
 from app.models import Admin
+from app.validation import password_error
 
 
 def create_admin(username, password):
     username = username.strip().lower()
-    if len(password) < 8:
-        raise ValueError("password_too_short")
-    if len(password) > 25:
-        raise ValueError("password_too_long")
+    error = password_error(password)
+    if error:
+        raise ValueError(error)
 
     try:
         with get_session(write=True) as session:

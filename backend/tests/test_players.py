@@ -49,6 +49,12 @@ def test_create_player_name_too_long(admin_client01):
     assert res.get_json() == {'error': 'name_too_long'}
 
 
+def test_create_player_name_wrong_type(admin_client01):
+    res = admin_client01.post('/api/players', json={'name': 5})
+    assert res.status_code == 400
+    assert res.get_json() == {'error': 'invalid_payload'}
+
+
 def test_create_player_duplicate_name(admin_client01, four_players_admin01):
     res = admin_client01.post('/api/players', json={'name': 'alice'})
     assert res.status_code == 409

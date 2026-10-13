@@ -6,11 +6,14 @@ from flask_login import current_user
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 
+from app.constants import RANKING_NAME_MAX_LENGTH
 from app.db import get_session
 from app.models import Ranking, Match
 from app.pairing import build_round_pairings, MIN_ACTIVE_TO_START
-from app.routes.helpers.annotations import require_admin
+from app.routes.helpers.decorators import require_admin
+from app.routes.helpers.payload import get_body, get_str
 from app.stats import compute_standings, compute_history
+from app.validation import validate_name
 
 rankings_bp = Blueprint("rankings", __name__)
 
@@ -38,12 +41,8 @@ def get_ranking(ranking_id):
 @rankings_bp.route("/api/rankings", methods=["POST"])
 @require_admin
 def create_ranking():
-    data = request.get_json() or {}
-    name = data.get("name", "").strip()
-    if not name:
-        abort(400, "name_required")
-    if len(name) > 50:
-        abort(400, "name_too_long")
+    data = get_body()
+    name = validate_name(get_str(data, "name"), RANKING_NAME_MAX_LENGTH)
 
     ranking = Ranking(name=name, created_by_admin_id=current_user.id)
     try:

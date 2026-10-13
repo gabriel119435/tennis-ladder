@@ -4,8 +4,8 @@ from conftest import create_ranking, register
 def test_standings_reflects_results(admin_client01, ranking_id):
     matches = admin_client01.get(f'/api/rankings/{ranking_id}/matches').get_json()
     first_match = matches[0]
-    admin_client01.patch(
-        f'/api/matches/{first_match["id"]}', json={'result_type': 'played', 'sets': [[6, 4], [6, 3]]}
+    admin_client01.post(
+        f'/api/matches/{first_match["id"]}/result', json={'result_type': 'played', 'sets': [[6, 4], [6, 3]]}
     )
     admin_client01.post(f'/api/rankings/{ranking_id}/close')
 

@@ -44,6 +44,13 @@ def test_add_participant_invalid_player(admin_client01):
     assert res.get_json() == {'error': 'invalid_player_id'}
 
 
+def test_add_participant_player_id_wrong_type(admin_client01):
+    ranking_id = create_ranking(admin_client01)
+    res = admin_client01.post(f'/api/participants/{ranking_id}', json={'player_id': '1'})
+    assert res.status_code == 400
+    assert res.get_json() == {'error': 'invalid_payload'}
+
+
 def test_add_participant_ranking_not_found(admin_client01, four_players_admin01):
     res = admin_client01.post('/api/participants/1', json={'player_id': four_players_admin01['alice_id']})
     assert res.status_code == 404

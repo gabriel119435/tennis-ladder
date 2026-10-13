@@ -12,14 +12,14 @@ class Base(DeclarativeBase):
     pass
 
 
-DB_URL = os.environ.get('DATABASE_URL', f'sqlite:///{DB_PATH}')
+DB_URL = os.environ.get("DATABASE_URL", f"sqlite:///{DB_PATH}")
 
-if DB_URL == 'sqlite:///:memory:':
+if DB_URL == "sqlite:///:memory:":
     from sqlalchemy.pool import StaticPool
 
     engine = create_engine(
         DB_URL,
-        connect_args={'check_same_thread': False},
+        connect_args={"check_same_thread": False},
         poolclass=StaticPool,
     )
 else:
@@ -29,6 +29,14 @@ else:
 @event.listens_for(engine, "connect")
 def set_sqlite_pragma(dbapi_conn, _):
     dbapi_conn.execute("PRAGMA foreign_keys = ON")
+
+
+@event.listens_for(engine, "checkin")
+def reset_query_only(dbapi_conn, _):
+    # every connection returns to the pool writable, whatever path released it
+    # None when the connection was invalidated, nothing to reset
+    if dbapi_conn is not None:
+        dbapi_conn.execute("PRAGMA query_only = OFF")
 
 
 SessionLocal = sessionmaker(
@@ -49,6 +57,4 @@ def get_session(write=False):
         session.rollback()
         raise
     finally:
-        if not write:
-            session.execute(text("PRAGMA query_only = OFF"))
         session.close()

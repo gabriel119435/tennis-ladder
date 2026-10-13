@@ -50,6 +50,12 @@ def test_create_ranking_missing_name(admin_client01):
     assert res.get_json() == {'error': 'name_required'}
 
 
+def test_create_ranking_name_wrong_type(admin_client01):
+    res = admin_client01.post('/api/rankings', json={'name': 5})
+    assert res.status_code == 400
+    assert res.get_json() == {'error': 'invalid_payload'}
+
+
 def test_create_ranking_duplicate_same_day(admin_client01):
     admin_client01.post('/api/rankings', json={'name': 'duplicate'})
     res = admin_client01.post('/api/rankings', json={'name': 'duplicate'})
@@ -140,8 +146,8 @@ def test_start_round_two(admin_client01, four_players_admin01):
 
     round_1 = admin_client01.get(f'/api/rankings/{ranking_id}/matches').get_json()
     first_match = round_1[0]
-    admin_client01.patch(
-        f'/api/matches/{first_match["id"]}', json={'result_type': 'played', 'sets': [[6, 4], [6, 3]]}
+    admin_client01.post(
+        f'/api/matches/{first_match["id"]}/result', json={'result_type': 'played', 'sets': [[6, 4], [6, 3]]}
     )
     admin_client01.post(f'/api/rankings/{ranking_id}/close')
 

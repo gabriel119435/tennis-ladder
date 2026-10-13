@@ -1,12 +1,13 @@
 from datetime import date as date_type
 
-from flask import Blueprint, request, jsonify, abort
+from flask import Blueprint, jsonify, abort
 from flask_login import current_user
 from sqlalchemy import select
 
 from app.db import get_session
 from app.models import Ranking, RankingParticipant, Player
-from app.routes.helpers.annotations import require_admin
+from app.routes.helpers.decorators import require_admin
+from app.routes.helpers.payload import get_body, get_int
 
 participants_bp = Blueprint("participants", __name__)
 
@@ -26,8 +27,8 @@ def get_participants(ranking_id):
 @participants_bp.route("/api/participants/<int:ranking_id>", methods=["POST"])
 @require_admin
 def add_participant(ranking_id):
-    data = request.get_json() or {}
-    player_id = data.get("player_id")
+    data = get_body()
+    player_id = get_int(data, "player_id")
     if not player_id:
         abort(400, "player_id_required")
 
