@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify, abort
+from flask import Blueprint, abort, jsonify
 
 from app.db import get_session
 from app.models import Ranking

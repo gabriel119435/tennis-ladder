@@ -1,13 +1,13 @@
-from datetime import date as date_type
-
-from flask import Blueprint, jsonify, abort
+from flask import Blueprint, abort, jsonify
 from flask_login import current_user
 from sqlalchemy import select
 
 from app.db import get_session
-from app.models import Ranking, RankingParticipant, Player
+from app.models import Player, RankingParticipant
 from app.routes.helpers.decorators import require_admin
+from app.routes.helpers.ownership import get_owned_ranking
 from app.routes.helpers.payload import get_body, get_int
+from app.routes.helpers.sorting import name_sort_key
 
 participants_bp = Blueprint("participants", __name__)
 
@@ -18,9 +18,9 @@ def get_participants(ranking_id):
         rows = session.execute(
             select(RankingParticipant, Player.name)
             .join(Player, RankingParticipant.player_id == Player.id)
-            .where(RankingParticipant.ranking_id == ranking_id)
-            .order_by(RankingParticipant.id)
+            .where(RankingParticipant.ranking_id == ranking_id, RankingParticipant.active.is_(True))
         ).all()
+    rows = sorted(rows, key=lambda row: name_sort_key(row.name))
     return jsonify([_serialize_participant(participant, name) for participant, name in rows])
 
 
@@ -33,13 +33,11 @@ def add_participant(ranking_id):
         abort(400, "player_id_required")
 
     with get_session(write=True) as session:
-        ranking = session.get(Ranking, ranking_id)
-        if not ranking:
-            abort(404, "not_found")
+        get_owned_ranking(session, ranking_id)
         player = session.get(Player, player_id)
         if not player:
             abort(400, "invalid_player_id")
-        if ranking.created_by_admin_id != current_user.id or player.created_by_admin_id != current_user.id:
+        if player.created_by_admin_id != current_user.id:
             abort(403, "not_owner")
 
         participant = _get_participant(session, ranking_id, player_id)
@@ -47,40 +45,27 @@ def add_participant(ranking_id):
             participant.active = True
             status = 200
         else:
-            participant = RankingParticipant(
-                ranking_id=ranking_id,
-                player_id=player_id,
-                active=True,
-                joined_at=date_type.today().isoformat(),
+            session.add(
+                RankingParticipant(
+                    ranking_id=ranking_id,
+                    player_id=player_id,
+                    active=True,
+                )
             )
-            session.add(participant)
-            session.flush()
             status = 201
 
-        return jsonify(_serialize_participant(participant, player.name)), status
+    return jsonify({"message": "added"}), status
 
 
 def _serialize_participant(participant, name):
-    return {
-        "id": participant.id,
-        "ranking_id": participant.ranking_id,
-        "player_id": participant.player_id,
-        "name": name,
-        "active": participant.active,
-        "joined_at": participant.joined_at,
-    }
+    return {"player_id": participant.player_id, "name": name}
 
 
 @participants_bp.route("/api/participants/<int:ranking_id>/<int:player_id>", methods=["DELETE"])
 @require_admin
 def remove_participant(ranking_id, player_id):
     with get_session(write=True) as session:
-        ranking = session.get(Ranking, ranking_id)
-        if not ranking:
-            abort(404, "not_found")
-        if ranking.created_by_admin_id != current_user.id:
-            abort(403, "not_owner")
-
+        get_owned_ranking(session, ranking_id)
         participant = _get_participant(session, ranking_id, player_id)
         if not participant:
             abort(404, "not_found")
@@ -92,7 +77,6 @@ def remove_participant(ranking_id, player_id):
 def _get_participant(session, ranking_id, player_id):
     return session.scalars(
         select(RankingParticipant).where(
-            RankingParticipant.ranking_id == ranking_id,
-            RankingParticipant.player_id == player_id
+            RankingParticipant.ranking_id == ranking_id, RankingParticipant.player_id == player_id
         )
     ).one_or_none()

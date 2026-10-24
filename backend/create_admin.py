@@ -1,10 +1,3 @@
-"""
-creates a new admin account directly in the db.
-
-usage: uv run create_admin.py <username> <password>
-no running server needed, connects to the sqlite db directly.
-"""
-
 import argparse
 import os
 import sys
@@ -16,6 +9,11 @@ from app.admin import create_admin
 
 
 def main():
+    """
+    creates a new admin account directly in the db.
+
+    usage: uv run create_admin.py <username> <password>
+    """
     parser = argparse.ArgumentParser(description="creates a new admin account")
     parser.add_argument("username")
     parser.add_argument("password")

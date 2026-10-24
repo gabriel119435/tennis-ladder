@@ -32,6 +32,11 @@ def get_int(data, key):
     value = data.get(key)
     if value is None:
         return None
-    if not isinstance(value, int) or isinstance(value, bool):
+    if not is_int(value):
         abort(400, "invalid_payload")
     return value
+
+
+# bool is a subclass of int in python, true/false would pass as 1/0 without the second check
+def is_int(value):
+    return isinstance(value, int) and not isinstance(value, bool)

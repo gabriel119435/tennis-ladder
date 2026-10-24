@@ -1,7 +1,7 @@
-from flask import Blueprint, jsonify, abort
-from flask_login import login_user, logout_user, current_user
+from flask import Blueprint, abort, jsonify
+from flask_login import current_user, login_user, logout_user
 from sqlalchemy import select
-from werkzeug.security import check_password_hash
+from werkzeug.security import check_password_hash, generate_password_hash
 
 from app.db import get_session
 from app.models import Admin, AuthAdmin
@@ -9,6 +9,11 @@ from app.routes.helpers.decorators import require_admin
 from app.routes.helpers.payload import get_body, get_str
 
 auth_bp = Blueprint("auth", __name__)
+
+DEFAULT_ADMIN_USERNAME = "administrador"
+DEFAULT_ADMIN_PASS = "senha secreta"
+
+_DUMMY_HASH = generate_password_hash(DEFAULT_ADMIN_PASS)
 
 
 @auth_bp.route("/api/me")
@@ -19,7 +24,7 @@ def me():
 
 
 def _serialize_admin(admin):
-    return {"id": admin.id, "username": admin.username}
+    return {"id": admin.id, "username": admin.username, "is_default": admin.username == DEFAULT_ADMIN_USERNAME}
 
 
 @auth_bp.route("/api/login", methods=["POST"])
@@ -31,7 +36,8 @@ def login():
     with get_session() as session:
         admin = session.scalars(select(Admin).filter_by(username=username)).one_or_none()
 
-        if not admin or not check_password_hash(admin.password_hash, password):
+        password_hash = admin.password_hash if admin else _DUMMY_HASH
+        if not check_password_hash(password_hash, password) or not admin:
             abort(401, "invalid_credentials")
 
         login_user(AuthAdmin.from_admin(admin))

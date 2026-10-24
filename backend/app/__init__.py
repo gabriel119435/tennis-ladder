@@ -8,20 +8,19 @@ from sqlalchemy import select
 from werkzeug.exceptions import HTTPException
 
 from app.admin import create_admin
-from app.db import get_session, engine, Base
+from app.db import Base, engine, get_session
 from app.models import Admin, AuthAdmin
-from app.routes.auth import auth_bp
+from app.routes.auth import DEFAULT_ADMIN_PASS, DEFAULT_ADMIN_USERNAME, auth_bp
 from app.routes.matches import matches_bp
 from app.routes.participants import participants_bp
 from app.routes.players import players_bp
 from app.routes.rankings import rankings_bp
+from app.routes.reset import reset_bp
 from app.routes.standings import standings_bp
 from app.validation import password_error
 
 login_manager = LoginManager()
 logger = logging.getLogger(__name__)
-
-DEFAULT_ADMIN_PASS = "admin_pass"
 
 
 def create_app():
@@ -47,13 +46,15 @@ def create_app():
     @login_manager.user_loader
     def load_user(user_id):
         with get_session() as session:
-            admin_ = session.get(Admin, int(user_id))
-            if not admin_:
+            _admin = session.get(Admin, int(user_id))
+            if not _admin:
                 return None
-            return AuthAdmin.from_admin(admin_)
+            return AuthAdmin.from_admin(_admin)
 
     @app.errorhandler(HTTPException)
     def handle_http_error(e):
+        # a snake_case description is an error code, sent as is: a typo reaches the ui as "<code> not found", by design
+        # any other text, like werkzeug's default sentences, falls back to the status name below
         if re.fullmatch(r"[a-z_]+", e.description):
             return jsonify({"error": e.description}), e.code
         # "Method Not Allowed" -> "method_not_allowed"
@@ -64,27 +65,32 @@ def create_app():
     return app
 
 
-# migrations are by default idempotent, are always applied on startup
+# every migration is idempotent and runs on every startup
 def _apply_migrations():
     _migration_000_create_db()
 
 
 def _migration_000_create_db():
-    Base.metadata.create_all(engine)  # idempotent: no op if tables already exist
+    # idempotent: no op if tables already exist
+    Base.metadata.create_all(engine)
 
 
 # data step, not a migration: runs on every startup, creates the admin only if missing
 def _create_default_admin():
     with get_session() as session:
         # admin already exists, ADMIN_PASS is not read
-        if session.scalars(select(Admin).filter_by(username="admin")).one_or_none():
+        if session.scalars(select(Admin).filter_by(username=DEFAULT_ADMIN_USERNAME)).one_or_none():
             return
-    create_admin("admin", _get_admin_pass())
+    # the sample ranking comes only with the default admin, on the startup that creates it, SEED_RANKING=0 skips it
+    create_admin(
+        DEFAULT_ADMIN_USERNAME,
+        _get_default_admin_pass(),
+        seed=os.environ.get("SEED_RANKING", "1") == "1",
+    )
     logger.info("admin created")
 
 
-def _get_admin_pass():
-    # ADMIN_PASS unset or empty: use a known weak default, for local dev only
+def _get_default_admin_pass():
     admin_pass = os.environ.get("ADMIN_PASS") or DEFAULT_ADMIN_PASS
     error = password_error(admin_pass)
     if error:
@@ -99,3 +105,4 @@ def _register_blueprints(app):
     app.register_blueprint(participants_bp)
     app.register_blueprint(matches_bp)
     app.register_blueprint(standings_bp)
+    app.register_blueprint(reset_bp)

@@ -6,20 +6,20 @@ def get_pairing_window(standings_order, player_id, window_size=INITIAL_WINDOW_SI
     """
     returns up to window_size/2 neighbors above player_id and up to window_size/2 below.
 
-    standings_order: list[int]: player ids, ranked strongest first.
+    standings_order: list[int]: player ids, strongest ranked first.
     player_id: int: the player to build a window around.
     window_size: int: max neighbors to return, split evenly across both sides.
     returns: list[int]: the neighbors found, above followed by below.
 
-    example: standings_order=[20, ..., 29] (n=10), player_id=22 (so pos=2), half=5
+    example: standings_order=[20, ..., 29], window_size=10, player_id=22. so pos=2 and half=5
     above = standings_order[0:2] = [20, 21]              (only 2 exist, short side stays short)
     below = standings_order[3:8] = [23, 24, 25, 26, 27]  (5 available)
     returns [20, 21, 23, 24, 25, 26, 27]
     """
     pos = standings_order.index(player_id)
     half = window_size // 2
-    above = standings_order[max(0, pos - half):pos]
-    below = standings_order[pos + 1: pos + 1 + half]
+    above = standings_order[max(0, pos - half) : pos]
+    below = standings_order[pos + 1 : pos + 1 + half]
     return above + below
 
 
@@ -35,7 +35,7 @@ def select_opponents(pool, times_played, needed, rng, last_played=None):
     last_played: dict[int, int] | None: candidate id -> round they most recently played this player, 0 if absent.
     returns: list[int]: the `needed` chosen ids. may be fewer.
 
-    example: pool=[3, 4, 5, 10], times_played={3: 1, 4: 1, 5: 1} (10 absent, so its count is 0),
+    example: pool=[3, 4, 5, 10], times_played={3: 1, 4: 1, 5: 1}
     needed=2, tiers = {0: [10], 1: [3, 4, 5]}
 
     tier 0: candidates=[10], chosen.extend(candidates[:2]) -> chosen = [10], still need 1 more
@@ -51,9 +51,11 @@ def select_opponents(pool, times_played, needed, rng, last_played=None):
 
     chosen = []
     for tier in sorted(tiers):
-        candidates = tiers[tier][:]  # [:] shallow copy so shuffle doesn't alter tiers[tier]
+        # [:] shallow copy so shuffle doesn't alter tiers[tier]
+        candidates = tiers[tier][:]
         rng.shuffle(candidates)
-        candidates.sort(key=lambda c: last_played.get(c, 0))  # stable: ties keep the shuffle's order
+        # stable: ties keep the shuffle's order
+        candidates.sort(key=lambda c: last_played.get(c, 0))
         chosen.extend(candidates[: needed - len(chosen)])
         if len(chosen) == needed:
             break
@@ -62,9 +64,9 @@ def select_opponents(pool, times_played, needed, rng, last_played=None):
 
 def _order_in_two_fronts(standings_order):
     """
-    order player ids like: 1st, last, 2nd, 2nd-last, 3rd, ..., converging toward the middle.
+    order player ids like: 1st, last, 2nd, 2nd-last, ..., converging toward the middle.
 
-    standings_order: list[int]: player ids, ranked strongest first.
+    standings_order: list[int]: player ids, strongest ranked first.
     returns: list[int]: every id from standings_order, reordered.
 
     example: standings_order=[1, 2, ..., 10] -> [1, 10, 2, 9, 3, 8, 4, 7, 5, 6]
@@ -84,7 +86,7 @@ def _find_pool(standings_order, player_id, remaining):
     """
     candidates for player_id that still have an open slot, widening the window until at least one is found.
 
-    standings_order: list[int]: player ids, ranked strongest first.
+    standings_order: list[int]: player ids, strongest ranked first.
     player_id: int: the player to find candidates for.
     remaining: dict[int, int]: player id -> opponents still needed (0 means fully paired already).
     returns: list[int]: candidates with remaining > 0, possibly empty if nobody has an open slot at all.
@@ -145,7 +147,8 @@ def _find_any_duplicate(pairs):
     """
     seen = set()
     for a, b in pairs:
-        key = frozenset((a, b))  # immutable set is hashable
+        # immutable set is hashable
+        key = frozenset((a, b))
         if key in seen:
             return a, b
         seen.add(key)
@@ -215,14 +218,14 @@ def _repair_duplicate(pairs, pos, a, b):
 
 def build_round_pairings(standings_order, history, rng, last_played=None):
     """
-    build one round's pairings using a two-fronts order: strongest, weakest, 2nd-strongest, 2nd-weakest.
+    build one round's pairings using a two-fronts order: 1st, last, 2nd, 2nd last, ...
     the order converges toward the middle.
 
     for each player in that order still needing opponents: find candidates with _find_pool, pick via select_opponents.
     if _find_pool finds nobody with an open slot at all, _repair_excluded_player resolves it.
     afterward, _find_any_duplicate/_repair_duplicate clean up any pair that got matched against itself twice.
 
-    standings_order: list[int]: active player ids, ranked strongest first, len >= MIN_ACTIVE_TO_START.
+    standings_order: list[int]: active player ids, strongest ranked first, len >= MIN_ACTIVE_TO_START.
     history: dict[int, dict[int, int]]: player id -> {opponent id -> times already played}.
     rng: random.Random: source of randomness, passed through to select_opponents.
     last_played: dict[int, dict[int, int]] | None: player id -> {opponent id -> round most recently played}.
@@ -248,11 +251,7 @@ def build_round_pairings(standings_order, history, rng, last_played=None):
                 continue
 
             opponents = select_opponents(
-                pool,
-                history.get(player_id, {}),
-                remaining[player_id],
-                rng,
-                last_played.get(player_id, {})
+                pool, history.get(player_id, {}), remaining[player_id], rng, last_played.get(player_id, {})
             )
 
             for opponent in opponents:

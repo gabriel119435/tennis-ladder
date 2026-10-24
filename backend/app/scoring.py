@@ -1,10 +1,10 @@
 VALID_SET_SCORES = {(6, 0), (6, 1), (6, 2), (6, 3), (6, 4), (7, 5), (7, 6)}
 
 POINTS = {
-    "win": 100,
-    "loss": 25,
-    "wo_winner": 100,
-    "wo_loser": -100,
+    "win": 4,
+    "loss": 1,
+    "wo_winner": 4,
+    "wo_loser": -2,
     "no_match": 0,
 }
 
@@ -22,6 +22,10 @@ def valid_super_tiebreak_score(points_a, points_b):
     return winner - loser == 2
 
 
+def valid_third_set_score(games_a, games_b):
+    return valid_set_score(games_a, games_b) or valid_super_tiebreak_score(games_a, games_b)
+
+
 def _set_winner(set_score):
     games_a, games_b = set_score
     return "a" if games_a > games_b else "b"
@@ -37,62 +41,45 @@ def match_winner(sets):
 
     winner1, winner2 = _set_winner(set1), _set_winner(set2)
 
-    if winner1 == winner2:
-        if len(sets) != 2:
-            raise ValueError("unexpected_third_set")
+    # 2-0 takes exactly 2 sets, a 1-1 split takes a 3rd one
+    if (winner1 == winner2) != (len(sets) == 2):
+        raise ValueError("invalid_set_count")
+    if len(sets) == 2:
         return winner1
 
-    if len(sets) != 3:
-        raise ValueError("missing_super_tiebreak")
-    if not valid_super_tiebreak_score(*sets[2]):
-        raise ValueError("invalid_super_tiebreak_score")
+    if not valid_third_set_score(*sets[2]):
+        raise ValueError("invalid_set_score")
     return _set_winner(sets[2])
 
 
 def sets_won(sets, side):
-    """
-    count of sets side won; a super tiebreak (a 3rd entry) counts as one set, same as a regular set.
-
-    sets: list[tuple[int, int]]: (games_a, games_b) per set, in the order played.
-    side: str: 'a' or 'b'.
-    returns: int: sets won by side.
-
-    example: sets=[(7, 6), (2, 6), (12, 10)], side='a'
-    _set_winner((7, 6))   == 'a'  (7 > 6)    -> counted
-    _set_winner((2, 6))   == 'b'  (2 < 6)    -> not counted
-    _set_winner((12, 10)) == 'a'  (12 > 10)  -> counted
-    sum = 2
-    """
-    return sum(1 for set_score in sets if _set_winner(set_score) == side)
+    return sum(1 for _set in sets if _set_winner(_set) == side)
 
 
 def games_won(sets, side):
-    """
-    games side won: a regular set's games (index 0 or 1) count directly.
-    a super tiebreak (index 2, if present) counts as 1 game.
-
-    sets: list[tuple[int, int]]: (games_a, games_b) per set, in the order played.
-    side: str: 'a' or 'b'.
-    returns: int: games won by side.
-
-    example: sets=[(7, 6), (2, 6), (12, 10)], side='a'
-    i=0, (7, 6),   i < 2  -> total += games_a = 7    -> total = 7
-    i=1, (2, 6),   i < 2  -> total += games_a = 2    -> total = 9
-    i=2, (12, 10), i >= 2 -> _set_winner(...) == 'a' -> total += 1 -> total = 10
-    returns 10
-    """
     total = 0
-    for i, (games_a, games_b) in enumerate(sets):
-        if i < 2:
+    for games_a, games_b in sets:
+        if valid_set_score(games_a, games_b):
             total += games_a if side == "a" else games_b
         else:
             total += 1 if _set_winner((games_a, games_b)) == side else 0
     return total
 
 
-def points_for(outcome):
-    return POINTS[outcome]
-
-
-def standings_sort_key(points, sets, games, matches_played, participant_id):
-    return -points, -sets, -games, -matches_played, participant_id
+def standings_sort_key(
+    points,
+    won_matches,
+    lost_matches,
+    missed_matches,
+    won_sets,
+    won_games,
+    participant_id,
+):
+    return (
+        -points,
+        missed_matches,
+        -(won_matches + lost_matches),
+        -won_sets,
+        -won_games,
+        participant_id,
+    )

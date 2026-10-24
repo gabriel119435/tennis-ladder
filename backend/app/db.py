@@ -2,7 +2,7 @@ import os
 from contextlib import contextmanager
 
 from sqlalchemy import create_engine, event, text
-from sqlalchemy.orm import sessionmaker, DeclarativeBase
+from sqlalchemy.orm import DeclarativeBase, sessionmaker
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DB_PATH = os.path.join(BASE_DIR, "app.db")
@@ -33,15 +33,12 @@ def set_sqlite_pragma(dbapi_conn, _):
 
 @event.listens_for(engine, "checkin")
 def reset_query_only(dbapi_conn, _):
-    # every connection returns to the pool writable, whatever path released it
-    # None when the connection was invalidated, nothing to reset
     if dbapi_conn is not None:
         dbapi_conn.execute("PRAGMA query_only = OFF")
 
 
-SessionLocal = sessionmaker(
-    bind=engine, autoflush=False, autocommit=False, expire_on_commit=False
-)
+# objects stay readable after commit
+SessionLocal = sessionmaker(bind=engine, expire_on_commit=False)
 
 
 @contextmanager

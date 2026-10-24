@@ -1,23 +1,36 @@
-from sqlalchemy import select
-from sqlalchemy.exc import OperationalError
+import random
+
+from sqlalchemy import delete, select
 from werkzeug.security import generate_password_hash
 
 from app.db import get_session
-from app.models import Admin
-from app.validation import password_error
+from app.models import Admin, Match, Player, Ranking, RankingParticipant, SetScore
+from app.seed import seed_ranking
+from app.validation import name_error, password_error
 
 
-def create_admin(username, password):
+def create_admin(username, password, seed=False):
     username = username.strip().lower()
-    error = password_error(password)
+    error = name_error(username) or password_error(password)
     if error:
         raise ValueError(error)
 
-    try:
-        with get_session(write=True) as session:
-            if session.scalars(select(Admin).filter_by(username=username)).one_or_none():
-                return False
-            session.add(Admin(username=username, password_hash=generate_password_hash(password)))
-            return True
-    except OperationalError:
-        raise ValueError("db_error")
+    with get_session(write=True) as session:
+        if session.scalars(select(Admin).filter_by(username=username)).one_or_none():
+            return False
+        admin = Admin(username=username, password_hash=generate_password_hash(password))
+        session.add(admin)
+        session.flush()
+        if seed:
+            seed_ranking(session, admin.id, random.Random())
+        return True
+
+
+def wipe_admin(session, admin_id):
+    ranking_ids = select(Ranking.id).where(Ranking.created_by_admin_id == admin_id)
+    match_ids = select(Match.id).where(Match.ranking_id.in_(ranking_ids))
+    session.execute(delete(SetScore).where(SetScore.match_id.in_(match_ids)))
+    session.execute(delete(Match).where(Match.ranking_id.in_(ranking_ids)))
+    session.execute(delete(RankingParticipant).where(RankingParticipant.ranking_id.in_(ranking_ids)))
+    session.execute(delete(Ranking).where(Ranking.created_by_admin_id == admin_id))
+    session.execute(delete(Player).where(Player.created_by_admin_id == admin_id))

@@ -5,9 +5,9 @@ import pytest
 from app.pairing import (
     _find_any_duplicate,
     _find_pool,
-    _repair_excluded_player,
-    _repair_duplicate,
     _order_in_two_fronts,
+    _repair_duplicate,
+    _repair_excluded_player,
     build_round_pairings,
     get_pairing_window,
     select_opponents,
@@ -42,7 +42,7 @@ def test_get_pairing_window(standings_order, player_id, window_size, expected):
 def test_select_opponents_prefers_lower_tier(pool, times_played, needed, must_include):
     result = select_opponents(pool, times_played, needed, random.Random(0))
     assert len(result) == needed
-    assert len(set(result)) == needed  # no duplicates
+    assert len(set(result)) == needed
     for candidate in must_include:
         assert candidate in result
 
@@ -62,9 +62,11 @@ def test_select_opponents_falls_back_to_random_within_a_true_tie():
     pool = [3, 4]
     times_played = {3: 1, 4: 1}
     last_played = {3: 5, 4: 5}
+    # fmt: off
     results = {
         select_opponents(pool, times_played, 1, random.Random(seed), last_played)[0] for seed in range(20)
     }
+    # fmt: on
     assert results == {3, 4}
 
 
@@ -82,7 +84,8 @@ def test_order_in_two_fronts(standings_order, expected):
 
 def test_find_pool_widens_until_a_candidate_is_found():
     standings = list(range(1, 31))
-    remaining = {30: 1}  # everyone else already 0, 30 is far outside the initial window
+    # everyone else already 0, 30 is far outside the initial window
+    remaining = {30: 1}
     assert _find_pool(standings, 15, remaining) == [30]
 
 
@@ -109,7 +112,8 @@ def test_repair_excluded_player_breaks_the_closest_pair():
     [
         ([(1, 2), (3, 4)], None),
         ([(1, 2), (3, 4), (3, 4)], (3, 4)),
-        ([(1, 2), (10, 20), (20, 10)], (20, 10)),  # order-flipped duplicate still found
+        # order-flipped duplicate still found
+        ([(1, 2), (10, 20), (20, 10)], (20, 10)),
     ],
 )
 def test_find_any_duplicate(pairs, expected):
@@ -130,10 +134,11 @@ def test_build_round_pairings_rejects_too_few_participants():
 
 def test_build_round_pairings_3_players_forces_the_full_triangle():
     pairs = build_round_pairings([1, 2, 3], {}, random.Random(0))
-    assert (
-            {frozenset(pair) for pair in pairs} ==
-            {frozenset((1, 2)), frozenset((1, 3)), frozenset((2, 3))}
-    )
+    # fmt: off
+    assert {frozenset(pair) for pair in pairs} == {
+        frozenset((1, 2)), frozenset((1, 3)), frozenset((2, 3))
+    }
+    # fmt: on
 
 
 @pytest.mark.parametrize("n", [3, 4, 5, 10, 20, 30, 40, 50, 100, 200, 300])
