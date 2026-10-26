@@ -7,11 +7,9 @@ from app.db import get_session
 from app.models import Admin, AuthAdmin
 from app.routes.helpers.decorators import require_admin
 from app.routes.helpers.payload import get_body, get_str
+from app.settings import DEFAULT_ADMIN_NAME, DEFAULT_ADMIN_PASS
 
 auth_bp = Blueprint("auth", __name__)
-
-DEFAULT_ADMIN_USERNAME = "administrador"
-DEFAULT_ADMIN_PASS = "senha secreta"
 
 _DUMMY_HASH = generate_password_hash(DEFAULT_ADMIN_PASS)
 
@@ -24,7 +22,7 @@ def me():
 
 
 def _serialize_admin(admin):
-    return {"id": admin.id, "username": admin.username, "is_default": admin.username == DEFAULT_ADMIN_USERNAME}
+    return {"id": admin.id, "username": admin.username, "is_default": admin.username == DEFAULT_ADMIN_NAME}
 
 
 @auth_bp.route("/api/login", methods=["POST"])

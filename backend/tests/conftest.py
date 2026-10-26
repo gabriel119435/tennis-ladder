@@ -10,9 +10,10 @@ os.environ["SEED_RANKING"] = "0"
 
 import pytest
 
-from app import DEFAULT_ADMIN_USERNAME, create_app
+from app import create_app
 from app.db import get_session
 from app.models import Admin, Match, Player, Ranking, RankingParticipant, SetScore
+from app.settings import DEFAULT_ADMIN_NAME
 
 
 # session is the entire test runtime, so once per test run
@@ -64,7 +65,7 @@ def _clean_db(app):
         session.execute(delete(RankingParticipant))
         session.execute(delete(Ranking))
         session.execute(delete(Player))
-        session.execute(delete(Admin).where(Admin.username != DEFAULT_ADMIN_USERNAME))
+        session.execute(delete(Admin).where(Admin.username != DEFAULT_ADMIN_NAME))
 
 
 @pytest.fixture

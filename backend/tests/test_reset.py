@@ -1,12 +1,12 @@
 from conftest import create_ranking, register_participants
 
-from app import DEFAULT_ADMIN_PASS, DEFAULT_ADMIN_USERNAME
 from app.seed import DEFAULT_RANKING_NAME
+from app.settings import DEFAULT_ADMIN_NAME, DEFAULT_ADMIN_PASS
 
 
 def _default_admin_client(app):
     client = app.test_client()
-    client.post("/api/login", json={"username": DEFAULT_ADMIN_USERNAME, "password": DEFAULT_ADMIN_PASS})
+    client.post("/api/login", json={"username": DEFAULT_ADMIN_NAME, "password": DEFAULT_ADMIN_PASS})
     return client
 
 

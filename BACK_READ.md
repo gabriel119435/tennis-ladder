@@ -10,6 +10,7 @@ each new file builds on what came before, read them in order for the most cohere
 - **base**: database layer and wiring the application together
     - `constants.py`: password, name and word length rules.
     - `validation.py`: password and name checks, shared by players, rankings and admin usernames.
+    - `settings.py`: env vars for the default admin and the sample ranking, with fallbacks, checked on startup.
     - `db.py`: the single way to open a database session anywhere in the codebase.
     - `models.py`: every database table as a python class plus `AuthAdmin`.
     - `__init__.py`: `create_app()`: logging, migrations, default admin, cookie policy, auth, errors, blueprints.

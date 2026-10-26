@@ -1,23 +1,23 @@
 import pytest
 
-from app import DEFAULT_ADMIN_PASS, DEFAULT_ADMIN_USERNAME
 from app.admin import create_admin
+from app.settings import DEFAULT_ADMIN_NAME, DEFAULT_ADMIN_PASS
 
 
 def test_login_success(client):
-    res = client.post("/api/login", json={"username": DEFAULT_ADMIN_USERNAME, "password": DEFAULT_ADMIN_PASS})
+    res = client.post("/api/login", json={"username": DEFAULT_ADMIN_NAME, "password": DEFAULT_ADMIN_PASS})
     assert res.status_code == 200
-    assert res.get_json()["user"]["username"] == DEFAULT_ADMIN_USERNAME
+    assert res.get_json()["user"]["username"] == DEFAULT_ADMIN_NAME
     assert res.get_json()["user"]["is_default"] is True
 
 
 def test_login_cookie_same_site_strict(client):
-    res = client.post("/api/login", json={"username": DEFAULT_ADMIN_USERNAME, "password": DEFAULT_ADMIN_PASS})
+    res = client.post("/api/login", json={"username": DEFAULT_ADMIN_NAME, "password": DEFAULT_ADMIN_PASS})
     assert "samesite=strict" in res.headers["set-cookie"].lower()
 
 
 def test_login_wrong_password(client):
-    res = client.post("/api/login", json={"username": DEFAULT_ADMIN_USERNAME, "password": "wrong"})
+    res = client.post("/api/login", json={"username": DEFAULT_ADMIN_NAME, "password": "wrong"})
     assert res.status_code == 401
     assert res.get_json() == {"error": "invalid_credentials"}
 
@@ -54,6 +54,14 @@ def test_login_malformed_json(client):
 
 
 def test_me_when_logged_out(client):
+    res = client.get("/api/me")
+    assert res.status_code == 200
+    assert res.get_json() == {"user": None}
+
+
+def test_me_with_bad_cookie(client):
+    with client.session_transaction() as session:
+        session["_user_id"] = "bad cookie example"
     res = client.get("/api/me")
     assert res.status_code == 200
     assert res.get_json() == {"user": None}

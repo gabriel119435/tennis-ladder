@@ -10,14 +10,14 @@ from werkzeug.exceptions import HTTPException
 from app.admin import create_admin
 from app.db import Base, engine, get_session
 from app.models import Admin, AuthAdmin
-from app.routes.auth import DEFAULT_ADMIN_PASS, DEFAULT_ADMIN_USERNAME, auth_bp
+from app.routes.auth import auth_bp
 from app.routes.matches import matches_bp
 from app.routes.participants import participants_bp
 from app.routes.players import players_bp
 from app.routes.rankings import rankings_bp
 from app.routes.reset import reset_bp
 from app.routes.standings import standings_bp
-from app.validation import password_error
+from app.settings import DEFAULT_ADMIN_NAME, DEFAULT_ADMIN_PASS, SEED_RANKING, check_settings
 
 login_manager = LoginManager()
 logger = logging.getLogger(__name__)
@@ -26,6 +26,8 @@ logger = logging.getLogger(__name__)
 def create_app():
     # same as flask default format: [2026-10-13 10:00:00,000] INFO in __init__: admin created
     logging.basicConfig(level=logging.INFO, format="[%(asctime)s] %(levelname)s in %(module)s: %(message)s")
+    # fails startup on an invalid env value, before any of them is used
+    check_settings()
     _apply_migrations()
     # needs the final schema, so it runs after every migration
     _create_default_admin()
@@ -45,6 +47,8 @@ def create_app():
 
     @login_manager.user_loader
     def load_user(user_id):
+        if not user_id.isdigit():
+            return None
         with get_session() as session:
             _admin = session.get(Admin, int(user_id))
             if not _admin:
@@ -78,24 +82,16 @@ def _migration_000_create_db():
 # data step, not a migration: runs on every startup, creates the admin only if missing
 def _create_default_admin():
     with get_session() as session:
-        # admin already exists, ADMIN_PASS is not read
-        if session.scalars(select(Admin).filter_by(username=DEFAULT_ADMIN_USERNAME)).one_or_none():
+        # admin already exists, DEFAULT_ADMIN_PASS is not used
+        if session.scalars(select(Admin).filter_by(username=DEFAULT_ADMIN_NAME)).one_or_none():
             return
     # the sample ranking comes only with the default admin, on the startup that creates it, SEED_RANKING=0 skips it
     create_admin(
-        DEFAULT_ADMIN_USERNAME,
-        _get_default_admin_pass(),
-        seed=os.environ.get("SEED_RANKING", "1") == "1",
+        DEFAULT_ADMIN_NAME,
+        DEFAULT_ADMIN_PASS,
+        seed=SEED_RANKING,
     )
     logger.info("admin created")
-
-
-def _get_default_admin_pass():
-    admin_pass = os.environ.get("ADMIN_PASS") or DEFAULT_ADMIN_PASS
-    error = password_error(admin_pass)
-    if error:
-        raise ValueError(f"ADMIN_PASS: {error}")
-    return admin_pass
 
 
 def _register_blueprints(app):

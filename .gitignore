@@ -4,7 +4,15 @@
 
 # be auto-generated
 __pycache__/
+.pytest_cache/
+.ruff_cache/
 # be tooling
 backend/.venv
 # be local data
 backend/app.db
+# be secrets
+.env
+
+# fe
+frontend/node_modules
+frontend/dist

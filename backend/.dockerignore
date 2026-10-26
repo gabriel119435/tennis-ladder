@@ -1,0 +1,16 @@
+# auto-generated
+**/__pycache__/
+.pytest_cache/
+.ruff_cache/
+
+# os
+**/.DS_Store
+
+# tooling
+.venv
+
+# local data
+app.db
+
+# secrets
+.env

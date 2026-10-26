@@ -1,13 +1,13 @@
 import random
 from collections import Counter
 
+from conftest import get_or_create_admin
 from sqlalchemy import select
 
 from app.db import get_session
 from app.models import Match, Ranking, RankingParticipant
 from app.seed import DEFAULT_RANKING_NAME, seed_ranking
 from app.stats import compute_standings
-from conftest import get_or_create_admin
 
 
 def test_seed_ranking():
