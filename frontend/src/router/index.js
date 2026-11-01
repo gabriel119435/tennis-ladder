@@ -28,7 +28,7 @@ const router = createRouter({history: createWebHistory(), routes})
 // runs before every navigation, true lets it through, a url string redirects there
 // exported for the tests, named after vue router's navigation guards
 export async function navigationGuard(to) {
-    // asks who is logged in, a failure toasts and leaves sessionLoaded false so the next navigation retries
+    // asks who is logged in, a failure toasts and leaves sessionLoaded false
     if (!store.sessionLoaded) {
         const data = await getMe()
         if (data.error) {
@@ -44,6 +44,7 @@ export async function navigationGuard(to) {
         toast(translateError('unauthorized'))
         return '/login'
     }
+
     // login page with logged-in user: goes to /rankings
     if (to.path === '/login' && store.user) return '/rankings'
     return true
