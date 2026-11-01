@@ -10,6 +10,9 @@ export default {
         matches: 'partidas',
         logout: 'sair',
     },
+    select: {
+        empty: 'lista vazia',
+    },
     login: {
         title: 'login',
         username: 'usuário',
