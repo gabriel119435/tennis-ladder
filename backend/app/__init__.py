@@ -18,7 +18,7 @@ from app.routes.players import players_bp
 from app.routes.rankings import rankings_bp
 from app.routes.reset import reset_bp
 from app.routes.standings import standings_bp
-from app.settings import DEFAULT_ADMIN_NAME, DEFAULT_ADMIN_PASS, SEED_RANKING, check_settings
+from app.settings import DEFAULT_ADMIN_NAME, DEFAULT_ADMIN_PASS, DEFAULT_ADMIN_SEED_RANKING, check_settings
 
 login_manager = LoginManager()
 logger = logging.getLogger(__name__)
@@ -76,11 +76,12 @@ def _create_default_admin():
         # admin already exists, DEFAULT_ADMIN_PASS is not used
         if session.scalars(select(Admin).filter_by(username=DEFAULT_ADMIN_NAME)).one_or_none():
             return
-    # the sample ranking comes only with the default admin, on the startup that creates it, SEED_RANKING=0 skips it
+    # the sample ranking comes only with the default admin during startup that creates it
+    # DEFAULT_ADMIN_SEED_RANKING=0 skips it
     create_admin(
         DEFAULT_ADMIN_NAME,
         DEFAULT_ADMIN_PASS,
-        seed=SEED_RANKING,
+        seed=DEFAULT_ADMIN_SEED_RANKING,
     )
     logger.info("admin created")
 

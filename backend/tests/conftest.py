@@ -6,7 +6,7 @@ from werkzeug.security import generate_password_hash
 # must be set before any app import so db.py picks it up at module load time
 os.environ["DATABASE_URL"] = "sqlite:///:memory:"
 # general tests start without the sample ranking, test_seed.py calls seed_ranking directly
-os.environ["SEED_RANKING"] = "0"
+os.environ["DEFAULT_ADMIN_SEED_RANKING"] = "0"
 
 import pytest
 

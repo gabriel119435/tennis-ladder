@@ -1,0 +1,53 @@
+services:
+  flask-backend:
+    restart: unless-stopped
+    build:
+      context: ./backend
+      target: b-runtime
+    environment:
+      - SECRET_KEY=${SECRET_KEY:-} # :- defaults to empty when unset, without compose warning
+      - SESSION_COOKIE_SECURE=${SESSION_COOKIE_SECURE:-}
+      - DEFAULT_ADMIN_NAME=${DEFAULT_ADMIN_NAME:-}
+      - DEFAULT_ADMIN_PASS=${DEFAULT_ADMIN_PASS:-}
+      - DEFAULT_ADMIN_SEED_RANKING=${DEFAULT_ADMIN_SEED_RANKING:-}
+      - FLASK_HOST=0.0.0.0
+      - FLASK_DEBUG=0 # no reloader process, no debugger stack trace pages
+      - DATABASE_URL=sqlite:////data/app.db # db in the named volume, persists across container restarts
+    volumes:
+      - tennis-ladder-db:/data
+    mem_limit: 256m # oom-killed before os runs out; no swap
+    memswap_limit: 256m
+    cpus: 0.5 # can't starve the host scheduler
+    pids_limit: 100 # blocks fork bombs
+    security_opt:
+      - no-new-privileges:true
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  nginx-frontend:
+    restart: unless-stopped
+    build:
+      context: ./frontend
+      target: f-runtime
+    ports:
+      - "80:80" # only nginx exposed; flask is internal
+    depends_on:
+      - flask-backend
+    mem_limit: 64m
+    memswap_limit: 64m
+    cpus: 0.25
+    pids_limit: 50
+    security_opt:
+      - no-new-privileges:true
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+volumes:
+  tennis-ladder-db:
+    name: tennis-ladder-db
