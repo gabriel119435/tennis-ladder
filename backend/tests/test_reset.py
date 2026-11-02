@@ -44,4 +44,4 @@ def test_reset_keeps_other_admins_data(app, admin_client01, four_players_admin01
 
     assert len(admin_client01.get(f"/api/rankings?admin_id={admin_id}").get_json()) == 1
     assert len(admin_client01.get("/api/players").get_json()) == 4
-    assert len(admin_client01.get(f"/api/participants/{ranking_id}").get_json()) == 3
+    assert len(admin_client01.get(f"/api/rankings/{ranking_id}/participants").get_json()) == 3

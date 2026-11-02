@@ -1,14 +1,13 @@
 <script setup>
-import {computed, onMounted, ref, watch} from 'vue'
-import {useRoute, useRouter} from 'vue-router'
+import {onMounted, ref, watch} from 'vue'
+import {useRouter} from 'vue-router'
 import {useI18n} from 'vue-i18n'
 import {getRankings} from '../api/routes/rankings.js'
 import {getStandings} from '../api/routes/standings.js'
 import AppSelect from '../components/AppSelect.vue'
 import {useFetch} from '../composables/generic/useFetch.js'
-import {ANY_PICK, useRememberedPick} from '../composables/rankings/useRememberedPick.js'
+import {useUrlPick} from '../composables/rankings/useUrlPick.js'
 
-const route = useRoute()
 const router = useRouter()
 const {t} = useI18n()
 
@@ -27,17 +26,7 @@ const {data: rankings, load: loadRankings} = useFetch(getRankings)
 // }]
 const {data: rows, load: loadStandings} = useFetch(getStandings)
 
-// picker entries, one per ranking, ex: [{value: 3, label: 'ranking name - admin'}]
-const options = computed(() =>
-  rankings.value?.map((r) => ({value: r.id, label: `${r.name} - ${r.created_by_admin_username}`})),
-)
-
-// picked ranking from the url, ex: /standings/3 -> 3, picking replaces the url
-const picked = computed({
-  get: () => (route.params.id ? Number(route.params.id) : undefined),
-  set: (id) => router.replace(`/standings/${id}`),
-})
-useRememberedPick(ANY_PICK, picked, rankings)
+const {picked, options} = useUrlPick('/standings', rankings)
 
 // ids of rows showing their details on mobile, ex: Set([10, 12])
 const opened = ref(new Set())

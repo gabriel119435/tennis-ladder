@@ -78,9 +78,8 @@ def compute_standings(session, ranking_id):
     rows.sort(
         key=lambda row: standings_sort_key(
             row["points"],
-            row["won_matches"],
-            row["lost_matches"],
             row["total_matches"] - row["attended_matches"],
+            row["won_matches"] + row["lost_matches"],
             row["won_sets"],
             row["won_games"],
             participant_id_by_player_id[row["id"]],

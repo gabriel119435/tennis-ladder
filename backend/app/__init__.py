@@ -8,7 +8,8 @@ from sqlalchemy import select
 from werkzeug.exceptions import HTTPException
 
 from app.admin import create_admin
-from app.db import Base, engine, get_session
+from app.db import get_session
+from app.migrations import apply_migrations
 from app.models import Admin, AuthAdmin
 from app.routes.auth import auth_bp
 from app.routes.matches import matches_bp
@@ -28,7 +29,7 @@ def create_app():
     logging.basicConfig(level=logging.INFO, format="[%(asctime)s] %(levelname)s in %(module)s: %(message)s")
     # fails startup on an invalid env value, before any of them is used
     check_settings()
-    _apply_migrations()
+    apply_migrations()
     # needs the final schema, so it runs after every migration
     _create_default_admin()
 
@@ -67,16 +68,6 @@ def create_app():
     _register_blueprints(app)
 
     return app
-
-
-# every migration is idempotent and runs on every startup
-def _apply_migrations():
-    _migration_000_create_db()
-
-
-def _migration_000_create_db():
-    # idempotent: no op if tables already exist
-    Base.metadata.create_all(engine)
 
 
 # data step, not a migration: runs on every startup, creates the admin only if missing

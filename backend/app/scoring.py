@@ -72,9 +72,8 @@ def games_won(sets, side):
 
 def standings_sort_key(
     points,
-    won_matches,
-    lost_matches,
     missed_matches,
+    played_matches,
     won_sets,
     won_games,
     participant_id,
@@ -82,7 +81,7 @@ def standings_sort_key(
     return (
         -points,
         missed_matches,
-        -(won_matches + lost_matches),
+        -played_matches,
         -won_sets,
         -won_games,
         participant_id,

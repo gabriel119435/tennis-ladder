@@ -98,4 +98,4 @@ def create_ranking(admin_client, name="ranking_name01"):
 
 def register_participants(admin_client, ranking_id, four_players, *names):
     for name in names:
-        admin_client.post(f"/api/participants/{ranking_id}", json={"player_id": four_players[f"{name}_id"]})
+        admin_client.post(f"/api/rankings/{ranking_id}/participants", json={"player_id": four_players[f"{name}_id"]})

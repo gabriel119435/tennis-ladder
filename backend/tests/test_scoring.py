@@ -140,14 +140,14 @@ def test_points(outcome, expected):
 @pytest.mark.parametrize(
     "row_a, row_b",
     [
-        # input: points, won_matches, lost_matches, missed_matches, won_sets, won_games, participant_id
-        # order: -points, missed_matches, -(won_matches + lost_matches), -won_sets, -won_games, participant_id
-        ((1, 0, 0, 0, 0, 0, "higher_points"), (0, 0, 0, 0, 0, 0, "lower_points")),
-        ((0, 0, 0, 0, 0, 0, "fewer_missed"), (0, 0, 0, 1, 0, 0, "more_missed")),
-        ((0, 1, 0, 0, 0, 0, "more_matches"), (0, 0, 0, 0, 0, 0, "fewer_matches")),
-        ((0, 0, 0, 0, 1, 0, "more_sets"), (0, 0, 0, 0, 0, 0, "fewer_sets")),
-        ((0, 0, 0, 0, 0, 1, "more_games"), (0, 0, 0, 0, 0, 0, "fewer_games")),
-        ((0, 0, 0, 0, 0, 0, 0), (0, 0, 0, 0, 0, 0, 1)),
+        # input: points, missed_matches, played_matches, won_sets, won_games, participant_id
+        # order: -points, missed_matches, -played_matches, -won_sets, -won_games, participant_id
+        ((1, 0, 0, 0, 0, "higher_points"), (0, 0, 0, 0, 0, "lower_points")),
+        ((0, 0, 0, 0, 0, "fewer_missed"), (0, 1, 0, 0, 0, "more_missed")),
+        ((0, 0, 1, 0, 0, "more_played"), (0, 0, 0, 0, 0, "fewer_played")),
+        ((0, 0, 0, 1, 0, "more_sets"), (0, 0, 0, 0, 0, "fewer_sets")),
+        ((0, 0, 0, 0, 1, "more_games"), (0, 0, 0, 0, 0, "fewer_games")),
+        ((0, 0, 0, 0, 0, 0), (0, 0, 0, 0, 0, 1)),
     ],
 )
 def test_standings_sort_key(row_a, row_b):

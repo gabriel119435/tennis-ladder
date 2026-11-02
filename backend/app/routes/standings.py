@@ -7,7 +7,7 @@ from app.stats import compute_standings
 standings_bp = Blueprint("standings", __name__)
 
 
-@standings_bp.route("/api/standings/<int:ranking_id>")
+@standings_bp.route("/api/rankings/<int:ranking_id>/standings")
 def get_standings(ranking_id):
     with get_session() as session:
         if not session.get(Ranking, ranking_id):

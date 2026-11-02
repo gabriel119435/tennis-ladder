@@ -12,7 +12,7 @@ from app.routes.helpers.sorting import name_sort_key
 participants_bp = Blueprint("participants", __name__)
 
 
-@participants_bp.route("/api/participants/<int:ranking_id>")
+@participants_bp.route("/api/rankings/<int:ranking_id>/participants")
 def get_participants(ranking_id):
     with get_session() as session:
         if not session.get(Ranking, ranking_id):
@@ -26,7 +26,7 @@ def get_participants(ranking_id):
     return jsonify([_serialize_participant(participant, name) for participant, name in rows])
 
 
-@participants_bp.route("/api/participants/<int:ranking_id>", methods=["POST"])
+@participants_bp.route("/api/rankings/<int:ranking_id>/participants", methods=["POST"])
 @require_admin
 def add_participant(ranking_id):
     data = get_body()
@@ -63,7 +63,7 @@ def _serialize_participant(participant, name):
     return {"player_id": participant.player_id, "name": name}
 
 
-@participants_bp.route("/api/participants/<int:ranking_id>/<int:player_id>", methods=["DELETE"])
+@participants_bp.route("/api/rankings/<int:ranking_id>/participants/<int:player_id>", methods=["DELETE"])
 @require_admin
 def remove_participant(ranking_id, player_id):
     with get_session(write=True) as session:

@@ -13,6 +13,7 @@ each new file builds on what came before, read them in order for the most cohere
     - `settings.py`: env vars for the default admin and the sample ranking, with fallbacks, checked on startup.
     - `db.py`: the single way to open a database session anywhere in the codebase.
     - `models.py`: every database table as a python class plus `AuthAdmin`.
+    - `migrations.py`: schema migrations, each idempotent, all run on every startup.
     - `__init__.py`: `create_app()`: logging, migrations, default admin, cookie policy, auth, errors, blueprints.
 - **domain logic**: the business rules, no flask involved, tested standalone
     - `scoring.py`: set validity, match winner, games, points and standings tie-break sort.

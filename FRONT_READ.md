@@ -1,0 +1,76 @@
+# frontend reading order
+
+a beginner's guide to the frontend codebase, ordered from simple to complex.
+each new file builds on what came before, read them in order for the most coherent picture.
+
+- **entry point**
+    - `package.json`: dependencies (vue, vue-router, vue-i18n) and the dev, build, test, lint, format scripts.
+    - `.nvmrc`: exact node version, read by `nvm use`, matches the docker build.
+    - `vite.config.js`: vue plugin, `/api` proxy to the backend on port 5000.
+    - `eslint.config.js`: linter rules per file type, `npm run lint` reports bugs in js, vue and css.
+    - `prettier.config.js`: formatter layout options, `npm run format:check` lists files off that layout.
+    - `.prettierignore`: files prettier skips, the build output and npm's lock file.
+    - `index.html`: the single html page, vue mounts into its `#app` div.
+    - `public/favicon.svg`: the browser tab icon, a yellow tennis ball.
+- **base**: shared constants, text, state and the click outside directive
+    - `src/constants.js`: input length limits mirroring `backend/app/constants.py`, plus their locale slot values.
+    - `src/locales/pt-br.js`: every text the app shows, plus one message per backend error code.
+    - `src/i18n.js`: vue-i18n setup, pt-br only, a missing key shows as "{key} not found".
+    - `src/utils/translateError.js`: backend error code to its pt-br message.
+    - `src/utils/scoreUtils.js`: typed score cell to an int, only when every character is a digit.
+    - `src/store.js`: the logged-in user and whether the session check already ran.
+    - `src/directives/clickOutside.js`: `v-click-outside`, closes floating ui on a click elsewhere.
+- **api**: the fetch wrapper, then one file per backend resource under `src/api/routes/`
+    - `src/api/request.js`: the one `fetch` wrapper, failures become `{error: code}`, a 401 calls main.js's handler.
+    - `auth.js`: login, logout, session check.
+    - `rankings.js`: list (all or one admin's), create, start and close a round.
+    - `standings.js`: a ranking's standings.
+    - `players.js`: list the logged admin's players, create, rename.
+    - `participants.js`: list, add and remove a ranking's players.
+    - `matches.js`: the current round's matches, save and clear a result.
+    - `reset.js`: the default admin's reset.
+- **composables**: reusable logic, generic ones under `src/composables/generic/`
+    - `useToast.js`: the single error message, shown for a few seconds.
+    - `useButtonLock.js`: locks buttons while an action runs, restores keyboard focus after.
+    - `useStaleGuard.js`: drops an answer that a newer call already replaced.
+    - `useSubmit.js`: a button action, api call inside the lock, error as toast, success callback, true on failure.
+    - `useFetch.js`: page data, undefined until it arrives, `load` resets it, `reload` keeps it, true on failure.
+    - `rankings/useRememberedPick.js`: picked ranking in localStorage, rankings tab key, standings + matches key.
+    - `rankings/useUrlPick.js`: standings + matches ranking pick from the url, remembered, plus its picker options.
+    - `matches/useMatchResult.js`: one match's scores, wo pick, save body, shared by both layouts.
+- **components**: under `src/components/`
+    - `AppToast.vue`: renders the toast message with a fade.
+    - `NameForm.vue`: one input and one button, creates players and rankings, renames players.
+    - `AppTopBar.vue`: username or login link, page links, logout.
+    - `AppSelect.vue`: custom picker, keyboard navigation, flip up, `clearLabel` empties it, empty list notice.
+    - `MatchRows.vue`: desktop match: 2 table rows, inputs and wo picker while pending, save or clear.
+    - `MatchCard.vue`: mobile match: scoresheet card, save or clear, wo picker, names only if read only pending.
+    - `MatchList.vue`: matches as `MatchRows` in one table on desktop, `MatchCard`s on mobile, save and clear pass up.
+- **views**: one per page, under `src/views/`
+    - `LoginView.vue`: admin login form.
+    - `PlayersView.vue`: create player, one rename card per own player, reset for the default admin.
+    - `StandingsView.vue`: public ranking picker, standings table, mobile details toggle, the pick lives in the url.
+    - `RankingsView.vue`: create ranking, own ranking picker, start/close round, add/remove players.
+    - `MatchesView.vue`: public ranking picker, the pick in the url, pending as a match list or name cards, saved list.
+- **app**: the wiring, read last since it uses everything above
+    - `src/router/index.js`: routes, the session check, admin-only pages, the catch-all redirect.
+    - `src/App.vue`: top bar, current page, toast and tab title.
+    - `src/main.js`: creates the app, router, i18n, `v-click-outside`, the session lost handler for a 401.
+- **styles**: global css, itcss layers from generic to specific
+    - `src/style.css`: imports every layer in order, each one overrides the ones above.
+    - `styles/settings/variables.css`: palette, colors, spacing, fonts and other tokens.
+    - `styles/generic/reset.css`: removes browser defaults, base font and colors.
+    - `styles/elements/`: bare `button`, `input`, `table` and `hr`, plus primary, danger and toggle buttons.
+    - `styles/layout/structure.css`: page padding, page column, shared card, card row, tile, split tile, cell grid.
+    - `styles/components/`: top bar, toast, name form, select, match card.
+    - `styles/views/login.css`: the centered login card.
+    - `styles/overrides/mobile.css`: top bar rows, 2 column tabs, full width cards, stacked split tiles, table padding.
+- **tests**: next to the file they test
+    - `src/utils/scoreUtils.test.js`: digits only become an int, anything else stays as typed.
+    - `src/composables/generic/useStaleGuard.test.js`: newer call wins over an older one.
+    - `src/composables/generic/useFetch.test.js`: load resets to undefined, error toasts, stale dropped, reload keeps.
+    - `src/composables/generic/useSubmit.test.js`: success runs onSuccess, error toasts, busy lock sends nothing.
+    - `src/composables/generic/useButtonLock.test.js`: drops a call while locked, refocuses, skips a removed button.
+    - `src/composables/rankings/useRememberedPick.test.js`: saves, restores, forgets unlisted id, keeps while loading.
+    - `src/composables/matches/useMatchResult.test.js`: save body skips empty sets, keeps non digits, picks wo winner.
+    - `src/router/index.test.js`: session check and page access per login state.
