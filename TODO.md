@@ -1,58 +1,39 @@
-# this file is going to be rewritten, edited, changed, nothing here should be taken as final
+# pending/future tasks
 
-# grade-tracker frontend reference
+## pending
 
-read fully once, kept here so future frontend work has a fixed reference without re-reading grade-tracker.
+## future
 
-- stack: vue 3 (composition api, `<script setup>` only), vite, vue-router, vue-i18n, vitest. no state library.
-- dirs: `src/api/routes/` (one file per backend resource), `src/components/` (shared, `App`-prefixed), `src/composables/`
-  (`generic/` app-wide, `<domain>/` feature-specific), `src/directives/`, `src/locales/`, `src/router/`, `src/styles/`
-  (itcss layers), `src/utils/` (pure functions), `src/views/` (one subfolder per role, plus shared layouts).
-- naming: `.vue` files PascalCase, everything else camelCase, composables prefixed `use*`, css classes kebab-case.
-- state: a single `reactive()` object in `store.js` for cross-cutting session state only (user, sessionLoaded,
-  locales). no pinia. everything else lives local to the component or composable that needs it.
-- routing: one `beforeEach` guard (`navigationGuard`, exported for testing) does role-based redirects via a
-  `HOME_URL` map and each route's `meta.allowed_role`. session loads once per app load (`sessionLoaded` flag),
-  `getMe()` + a second parallel call resolved together.
-- layouts: `BaseLayout` (topbar + `RouterView` + toast, no nav) vs `TabLayout` (same, plus a nav slot of
-  `RouterLink` tabs). reused by composition across roles, never duplicated per role.
-- api layer: one `request.js` wraps `fetch` (`credentials: include`, json header only when a body is sent,
-  every failure normalized to `{error: code}`, auto-redirect to `/login` on a 401 except the login call itself).
-  each `api/routes/*.js` file is a flat list of thin exported async functions calling `request(...)`, no classes.
-- errors: backend always returns `{error: "some_code"}`. frontend never hardcodes an error string, always
-  `translateError(code)` through `backend_errors.*` in the locale files, then toasted or shown inline.
-- composables worth reusing as-is: `useLoading` (per-call guard against concurrent submits, drives `:disabled`),
-  `useToast` (module-level singleton, any component can toast), `useConfirm` (module-level singleton pendingId,
-  first click arms a delete, second click within a timeout confirms it; prefix ids like `'cat-'`/`'sub-'` when one
-  confirm instance is shared across multiple lists).
-- css: pure itcss, global styles only, `<style scoped>` deliberately never used (conflicts with the cascade).
-  everything imported once from `style.css` in strict layer order: settings (design tokens as css custom
-  properties, numeric scales not semantic-per-component) -> generic (reset) -> elements (buttons/inputs) ->
-  layout (structural classes shared across views) -> components -> views -> overrides (a single mobile
-  `@media` file last). one file per component/view under `styles/components/` and `styles/views/`.
-- i18n: `vue-i18n` with `legacy: false`, flat per-locale message objects, a custom `missing` handler.
-- tests: vitest, colocated `*.test.js` next to the file under test. covers the router guard and pure utils, not
-  full component rendering.
-
-# current tasks
-
-build order, in this sequence:
-
-1. frontend: grade-tracker as the base, same dir architecture and layout pattern.
-   blue palette instead of brown, same darker-inward and darker-text-than-background rules.
-   i18n: reuse vue-i18n exactly as grade-tracker sets it up (legacy: false, flat per-locale message files,
-   same missing handler for backend_errors passthrough). locales: pt-br and en-us, pt-br is the default.
-   public, 1 tab: StandingsView, rankings search box on top, below the standings list sided by pending games list.
-   click a player in StandingsView leads to RoundsView:
-   ranking + user dropdowns, a stats banner, pending games, round-by-round match and position history.
-   admin, 4 tabs in this order: rankings (create/start/pause), players (create/rename/add/remove),
-   matches (input results), standings (StandingsView read only as described before).
-   top bar: login button replaces the username when logged out.
-2. infra: docker-compose + nginx.
-   reverse proxy, rate limiting, static file serving.
-3. README.md last.
-
-# future tasks
-
-- FRONT_READ.md / INFRA_READ.md: file-by-file reading-order guides, deferred until each codebase exists.
-- `Player.email`: unique, required, with real validation, all at once.
+- scoped css: move each single-owner rule into its vue file's `<style scoped>` with mobile `@media` part included.
+    - shared rules stay global in the itcss layers: tokens, reset, elements, shared layout, shared mobile rules.
+    - also covers `table.css:25`/`:36` duplicate selector, `.mobile-only`, `.toggle-button`, `name-form.css` cascade.
+    - update FRONT_READ.md.
+- permanent delete: an admin deletes own rankings and players, each independently.
+- player filter: a player picker below the matches tab's ranking picker, shows one player's matches only.
+    - options in standings order, plus a clear entry via `clear-label`, like the wo picker (`MatchCard.vue:115`).
+    - no localStorage, unlike the ranking picker's `useRememberedPick`, a reload starts with no player picked.
+    - standings list active players only, so a player removed mid-round can't be picked.
+- player history: a new tab, ranking picker, player picker below it, then the player's rounds, newest first.
+    - each round: a `round N - start position X` header, then the player's matches of that round.
+    - match rows reuse the public matches display (`MatchCard`, read only).
+    - start position per round needs new backend logic, only current standings are computed today.
+    - player options from `/api/rankings/<id>/participants`, active players only, a removed player can't be picked.
+- rules summary: points and tie-break order below the standings table, text from one pt-br i18n key.
+    - points per result: win 4, loss 1, wo win 4, wo loss -2, no-match 0 (`scoring.py:5`).
+    - tie-break order in one line: points, fewest missed, most played, sets won, games won, registration.
+    - `RULES.md` and `scoring.py` stay the source, the i18n text changes with them.
+- public read cache: nginx keeps rankings, standings and matches for a few seconds, if standings load the pi.
+    - logged-in requests skip it, so an owner never sees a stale result right after saving.
+- cache `load_user`: it runs a `session.get` on every authenticated request, worth it if traffic grows.
+- two click confirm: port grade-tracker's `ConfirmButton.vue` + `useConfirm.js` to reset and close.
+    - 1st click shows a confirmation state for 3s, 2nd click runs it, remove player stays one click (reversible).
+    - also needs the `.btn-danger-confirm` css and a `common.confirmation` pt-br key.
+- stale tab writes issue: a tab left open across another admin's login writes as the new admin.
+    - creates land under the new admin, edits to the old admin's rankings fail with 403 `not_owner`.
+- player accounts: players become separate unique accounts, used in any admin's rankings at the same time.
+    - a validated email, unique, identifies the player and validates the account.
+    - only someone with access to that email can rename the player or register themselves.
+    - a password change or reset must invalidate other sessions, like grade-tracker's `AuthUser.get_id()`.
+    - merging v1's duplicated players happens in 2 steps.
+    - step 1: add a validated email column, not unique yet.
+    - step 2: merge player rows that share the same email.

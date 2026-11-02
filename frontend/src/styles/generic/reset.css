@@ -1,0 +1,28 @@
+/* every element on the page, resets browser defaults */
+* {
+    /* width and height include padding and border, not just content */
+    box-sizing: border-box;
+    /* browser default margins and paddings, ex: <h2> margins, <ul> left padding */
+    margin: 0;
+    padding: 0;
+    /* no text selection on purpose, app-like ui */
+    /* not baseline: safari reads -webkit-user-select below, every other browser reads this one */
+    /* eslint-disable-next-line css/use-baseline */
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+/* section titles in regular weight, ex: partidas pendentes, browsers draw h2 bold by default */
+h2 {
+    font-weight: normal;
+}
+
+body {
+    /* os native font: SF Pro on mac, Segoe UI on windows */
+    font-family: system-ui, sans-serif;
+    font-size: var(--font-0);
+    color: var(--color-fg-0);
+    background: var(--color-bg-0);
+    /* centers inline content: headings, labels, nav links */
+    text-align: center;
+}

@@ -1,0 +1,7 @@
+/* input and button side by side, centered in the tile, row also wins over a .card column */
+.name-form {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    gap: var(--space-3);
+}

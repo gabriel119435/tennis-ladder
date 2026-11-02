@@ -1,0 +1,67 @@
+/* var() can't be used here, the browser resolves @media before the cascade */
+@media (max-width: 800px) {
+    /* row 1: username | logout
+       row 2: tabs */
+    .top-bar {
+        grid-template-columns: 1fr 1fr;
+        row-gap: var(--space-3);
+    }
+
+    /* full width second row: tabs in 2 columns, 2 rows when logged in, each tab fills its half, label centered */
+    .top-bar-links {
+        grid-column: 1 / -1;
+        grid-row: 2;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+    }
+
+    /* side padding: space-2, narrow screens keep most of their width for the cards */
+    .page {
+        padding: 0 var(--space-2) var(--space-5);
+    }
+
+    /* one full width card per line */
+    .card {
+        width: 100%;
+    }
+
+    /* split tiles stack: the 16em input or picker and the button column don't fit side by side on a phone */
+    .card.tile-split {
+        grid-template-columns: 1fr;
+    }
+
+    /* cards stacked one per line already read as one list, no separator needed */
+    hr {
+        display: none;
+    }
+
+    /* revert gives each element its own default back: table-cell for td, table-row for tr */
+    .mobile-only {
+        display: revert;
+    }
+
+    .desktop-only {
+        display: none;
+    }
+
+    /* full card width, a wider button label takes from the other columns instead of growing the table */
+    table {
+        width: 100%;
+    }
+
+    /* side padding: space-3, narrow screens keep their width for the text */
+    th,
+    td {
+        padding: var(--space-2) var(--space-3);
+    }
+
+    /* names wrap at spaces, the 15 char word limit keeps every word inside its cell */
+    td {
+        white-space: normal;
+    }
+
+    /* button label on one line, only names wrap */
+    td button {
+        white-space: nowrap;
+    }
+}

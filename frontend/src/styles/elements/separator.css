@@ -1,0 +1,6 @@
+/* a line splitting a page's controls from its list, full page column width */
+hr {
+    width: 100%;
+    border: none;
+    border-top: var(--border-width) solid var(--color-b-0);
+}

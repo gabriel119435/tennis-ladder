@@ -1,0 +1,27 @@
+/* one match on mobile, see MatchCard.vue: save or clear and the set labels, a's and b's name and games, wo picker
+   name column takes the free width, 3 set columns of one fixed width so every card lines up */
+.match-sets {
+    display: grid;
+    grid-template-columns: 1fr repeat(3, var(--width-set-column-card));
+    /* rows and columns space-1 apart */
+    gap: var(--space-1);
+    /* every cell centered in its column, names included, same as the desktop table */
+    align-items: center;
+    justify-items: center;
+}
+
+/* a wo or no-match has no games: 2 equal halves, name and its text */
+.match-sets-wo {
+    grid-template-columns: 1fr 1fr;
+}
+
+/* no result and read only: one column, each name centered across the card */
+.match-sets-names {
+    grid-template-columns: 1fr;
+}
+
+/* read only pending card, one fixed width so every card in the wrap lines up, mobile.css makes it full width
+   width = widest name (--width-input-text) + card padding on both sides + card border on both sides */
+.match-names-card {
+    width: calc(var(--width-input-text) + 2 * var(--space-3) + 2 * var(--border-width));
+}

@@ -1,0 +1,52 @@
+/* bare table, one line under each row, inside a card */
+table {
+    border-collapse: collapse;
+}
+
+th,
+td {
+    padding: var(--space-2) var(--space-4);
+    border-bottom: var(--border-width) solid var(--color-b-0);
+    text-align: center;
+    /* one line on desktop, mobile.css lets names wrap */
+    white-space: nowrap;
+    /* headers in regular weight too, browsers draw th bold by default */
+    font-weight: normal;
+}
+
+/* no line under the last row, the card border already closes the table
+   a cell spanning the last 2 rows sits in the row before the last one */
+tbody tr:last-child td,
+tbody tr:nth-last-child(2) td[rowspan='2'] {
+    border-bottom: none;
+}
+
+/* one line per match, not between its 2 player rows, rowspan cells end below player b */
+.match-top > td:not([rowspan]) {
+    border-bottom: none;
+}
+
+/* match tables: rows and columns tighter than the standings table */
+.match-table th,
+.match-table td {
+    padding: var(--space-1) var(--space-2);
+}
+
+/* the 2 player rows of one match almost touch: 0 + space-1 = 4px between them, 8px between matches */
+.match-top > td:not([rowspan]) {
+    padding-bottom: 0;
+}
+
+.match-top + tr > td {
+    padding-top: var(--space-1);
+}
+
+/* 1º, 2º and 3º set share one width, fits a set label, tuned on screen */
+.set-column {
+    width: var(--width-set-column);
+}
+
+/* shown only on mobile, mobile.css flips both */
+.mobile-only {
+    display: none;
+}

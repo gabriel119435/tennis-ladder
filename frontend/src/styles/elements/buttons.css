@@ -1,0 +1,57 @@
+/* base reset, removes browser default button appearance */
+button {
+    cursor: pointer;
+    border: none;
+    border-radius: var(--border-radius-0);
+    /* top|bottom left|right */
+    padding: var(--space-1) var(--space-3);
+    font-size: var(--font-0);
+    /* browsers don't inherit font into buttons by default */
+    font-family: inherit;
+    transition: background var(--duration-0);
+}
+
+button:disabled {
+    opacity: var(--opacity-0);
+    cursor: not-allowed;
+}
+
+/* primary action: log in, create, save result, start round */
+.btn-primary {
+    background: var(--color-bg-action-0);
+    color: var(--color-fg-0);
+}
+
+.btn-primary:hover:not(:disabled) {
+    background: var(--color-bg-action-1);
+}
+
+/* destructive action: remove player, clear result, close round, logout */
+.btn-danger {
+    background: var(--color-bg-danger-0);
+    color: var(--color-fg-0);
+}
+
+.btn-danger:hover:not(:disabled) {
+    background: var(--color-bg-danger-1);
+}
+
+/* disabled danger buttons darken instead of fading, opacity fade blends with light surfaces and looks washed out */
+.btn-danger:disabled {
+    opacity: 1;
+    background: var(--color-bg-danger-1);
+}
+
+/* both labels stacked in one spot, the button keeps the wider one's width whichever shows */
+.toggle-button {
+    display: inline-grid;
+}
+
+.toggle-button > * {
+    grid-area: 1 / 1;
+}
+
+/* hidden but still taking its width */
+.toggle-button > .hidden {
+    visibility: hidden;
+}
