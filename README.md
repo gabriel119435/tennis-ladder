@@ -4,7 +4,7 @@ tennis ladder rankings: every round pairs each active player with 2 nearby oppon
 
 ![desktop matches](screenshot_desktop_matches.png)
 
-![mobile standings](screenshot_mobile_standings.png)
+<p align="center"><img src="screenshot_mobile_standings.png" alt="mobile standings"></p>
 
 ## stack
 
