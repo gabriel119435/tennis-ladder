@@ -63,6 +63,14 @@ def test_invalid_set_score_rejected(admin_client01, ranking_id):
     assert res.get_json() == {"error": "invalid_set_score"}
 
 
+def test_huge_tiebreak_score_rejected(admin_client01, ranking_id):
+    match_id = admin_client01.get(f"/api/rankings/{ranking_id}/matches").get_json()[0]["id"]
+
+    res = admin_client01.post(f"/api/matches/{match_id}/result", json={"sets": [[6, 4], [4, 6], [10**20, 10**20 - 2]]})
+    assert res.status_code == 400
+    assert res.get_json() == {"error": "invalid_set_score"}
+
+
 def test_set_score_wrong_type_rejected(admin_client01, ranking_id):
     match_id = admin_client01.get(f"/api/rankings/{ranking_id}/matches").get_json()[0]["id"]
 

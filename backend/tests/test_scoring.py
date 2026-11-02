@@ -60,6 +60,9 @@ def test_valid_set_score(games_a, games_b, expected):
         (11, 8, False),
         (-1, 10, False),
         (10, -1, False),
+        # winner capped at MAX_TIEBREAK_POINTS
+        (30, 28, True),
+        (31, 29, False),
     ],
 )
 def test_valid_super_tiebreak_score(points_a, points_b, expected):

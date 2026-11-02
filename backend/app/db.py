@@ -33,6 +33,8 @@ else:
 def set_sqlite_pragma(dbapi_conn, _):
     # sqlite skips fk checks unless enabled per connection
     dbapi_conn.execute("PRAGMA foreign_keys = ON")
+    # pysqlite stops sending its own BEGIN, get_session sends it instead
+    dbapi_conn.isolation_level = None
 
 
 @event.listens_for(engine, "checkin")
@@ -50,7 +52,10 @@ SessionLocal = sessionmaker(bind=engine, expire_on_commit=False)
 def get_session(write=False):
     session = SessionLocal()
     try:
-        if not write:
+        if write:
+            # write lock before any read, a parallel write waits here and then reads fresh data
+            session.execute(text("BEGIN IMMEDIATE"))
+        else:
             session.execute(text("PRAGMA query_only = ON"))
         yield session
         if write:

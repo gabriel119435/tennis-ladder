@@ -1,5 +1,7 @@
 VALID_SET_SCORES = {(6, 0), (6, 1), (6, 2), (6, 3), (6, 4), (7, 5), (7, 6)}
 
+MAX_TIEBREAK_POINTS = 30
+
 POINTS = {
     "win": 4,
     "loss": 1,
@@ -17,6 +19,8 @@ def valid_super_tiebreak_score(points_a, points_b):
     if points_a < 0 or points_b < 0:
         return False
     winner, loser = max(points_a, points_b), min(points_a, points_b)
+    if winner > MAX_TIEBREAK_POINTS:
+        return False
     if loser <= 8:
         return winner == 10
     return winner - loser == 2

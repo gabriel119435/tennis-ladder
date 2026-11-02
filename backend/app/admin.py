@@ -1,6 +1,7 @@
 import random
 
 from sqlalchemy import delete, select
+from sqlalchemy.exc import IntegrityError
 from werkzeug.security import generate_password_hash
 
 from app.db import get_session
@@ -15,15 +16,16 @@ def create_admin(username, password, seed=False):
     if error:
         raise ValueError(error)
 
-    with get_session(write=True) as session:
-        if session.scalars(select(Admin).filter_by(username=username)).one_or_none():
-            return False
-        admin = Admin(username=username, password_hash=generate_password_hash(password))
-        session.add(admin)
-        session.flush()
-        if seed:
-            seed_ranking(session, admin.id, random.Random())
+    try:
+        with get_session(write=True) as session:
+            admin = Admin(username=username, password_hash=generate_password_hash(password))
+            session.add(admin)
+            session.flush()
+            if seed:
+                seed_ranking(session, admin.id, random.Random())
         return True
+    except IntegrityError:
+        return False
 
 
 def wipe_admin(session, admin_id):

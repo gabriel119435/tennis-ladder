@@ -3,7 +3,7 @@ from flask_login import current_user
 from sqlalchemy import select
 
 from app.db import get_session
-from app.models import Player, RankingParticipant
+from app.models import Player, Ranking, RankingParticipant
 from app.routes.helpers.decorators import require_admin
 from app.routes.helpers.ownership import get_owned_ranking
 from app.routes.helpers.payload import get_body, get_int
@@ -15,6 +15,8 @@ participants_bp = Blueprint("participants", __name__)
 @participants_bp.route("/api/participants/<int:ranking_id>")
 def get_participants(ranking_id):
     with get_session() as session:
+        if not session.get(Ranking, ranking_id):
+            abort(404, "not_found")
         rows = session.execute(
             select(RankingParticipant, Player.name)
             .join(Player, RankingParticipant.player_id == Player.id)

@@ -89,6 +89,7 @@ export default {
         invalid_player_id: 'jogador inválido',
         too_few_active_participants: 'jogadores ativos insuficientes',
         round_closed: 'rodada encerrada',
+        round_ongoing: 'rodada em andamento',
         // results
         result_exists: 'resultado já existe',
         result_not_found: 'resultado não encontrado',

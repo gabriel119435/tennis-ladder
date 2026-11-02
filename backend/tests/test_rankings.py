@@ -46,6 +46,13 @@ def test_get_rankings_admin_id_filter(admin_client01, admin_client02):
     assert (usernames[ranking1_id], usernames[ranking2_id]) == ("admin1", "admin2")
 
 
+def test_get_rankings_admin_id_not_int(client):
+    for value in ("abc", "", "1.5"):
+        res = client.get(f"/api/rankings?admin_id={value}")
+        assert res.status_code == 400
+        assert res.get_json() == {"error": "invalid_payload"}
+
+
 def test_get_rankings_includes_created_ranking(admin_client01):
     ranking_id = create_ranking(admin_client01)
     rankings = admin_client01.get("/api/rankings").get_json()
@@ -113,6 +120,13 @@ def test_start_too_few_participants(admin_client01, four_players_admin01):
     res = admin_client01.post(f"/api/rankings/{ranking_id}/start")
     assert res.status_code == 400
     assert res.get_json() == {"error": "too_few_active_participants"}
+
+
+def test_start_while_ongoing_rejected(admin_client01, ranking_id):
+    res = admin_client01.post(f"/api/rankings/{ranking_id}/start")
+    assert res.status_code == 409
+    assert res.get_json() == {"error": "round_ongoing"}
+    assert _get_ranking(admin_client01, ranking_id)["round"] == 1
 
 
 def test_start_success_pairs_everyone(admin_client01, four_players_admin01):

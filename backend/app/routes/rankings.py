@@ -19,7 +19,12 @@ rankings_bp = Blueprint("rankings", __name__)
 
 @rankings_bp.route("/api/rankings")
 def get_rankings():
-    admin_id = request.args.get("admin_id", type=int)
+    admin_id = request.args.get("admin_id")
+    if admin_id is not None:
+        try:
+            admin_id = int(admin_id)
+        except ValueError:
+            abort(400, "invalid_payload")
     with get_session() as session:
         # serialized after the session closes, so the owner is loaded now
         query = select(Ranking).options(selectinload(Ranking.created_by_admin)).order_by(Ranking.id.desc())
@@ -61,6 +66,8 @@ def _serialize_ranking(ranking):
 def start_round(ranking_id):
     with get_session(write=True) as session:
         ranking = get_owned_ranking(session, ranking_id)
+        if ranking.ongoing:
+            abort(409, "round_ongoing")
         try:
             start_next_round(session, ranking, random.Random())
         except ValueError as e:

@@ -24,7 +24,7 @@ const {submit} = useSubmit(withLock)
 //     id: 3, name: 'ranking name', ongoing: true, round: 2,
 //     created_by_admin_id: 1, created_by_admin_username: 'admin',
 // }]
-const {data: rankings, load: loadRankings} = useFetch(getRankings)
+const {data: rankings, load: loadRankings, reload: reloadRankings} = useFetch(getRankings)
 
 // picked ranking's current round matches, by id, ex:
 // [{
@@ -69,12 +69,17 @@ watch(
   {immediate: true},
 )
 
-function handleSave(match, body) {
-  return submit(() => saveResult(match.id, body), reloadMatches)
+// a failed write can mean the round closed elsewhere, so both lists refresh
+async function refreshAfterFailure(failed) {
+  if (failed) await Promise.all([reloadRankings(), reloadMatches()])
 }
 
-function handleClear(match) {
-  return submit(() => clearResult(match.id), reloadMatches)
+async function handleSave(match, body) {
+  await refreshAfterFailure(await submit(() => saveResult(match.id, body), reloadMatches))
+}
+
+async function handleClear(match) {
+  await refreshAfterFailure(await submit(() => clearResult(match.id), reloadMatches))
 }
 </script>
 

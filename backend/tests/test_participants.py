@@ -44,6 +44,12 @@ def test_add_participant_ranking_not_found(admin_client01, four_players_admin01)
     assert res.status_code == 404
 
 
+def test_get_participants_ranking_not_found(client):
+    res = client.get(f"/api/participants/{MISSING_ID}")
+    assert res.status_code == 404
+    assert res.get_json() == {"error": "not_found"}
+
+
 def test_participant_mutations_require_ownership(admin_client01, admin_client02, four_players_admin01):
     ranking_id = create_ranking(admin_client01)
     register_participants(admin_client01, ranking_id, four_players_admin01, "alice", "bob", "charlie")

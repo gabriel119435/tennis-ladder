@@ -49,9 +49,9 @@ standings only list currently active players.
 
 ## starting and closing a round
 
-starting a round requires at least 3 active participants.
+starting a round requires at least 3 active participants and no round ongoing.
 starting flips the ranking to ongoing, moves to the next round, and generates that round's matches.
-this check is identical for a ranking's very first round or any later resume, nothing else is checked.
+these checks are identical for a ranking's very first round or any later resume, nothing else is checked.
 closing has no checks at all, it just flips the ranking back to idle.
 any match still without a result when the round closes becomes a no-match automatically.
 
@@ -85,6 +85,7 @@ every player ends with exactly 2 different opponents, pairing is always mutual.
 first to 10, win by 2.
 loser at 8 or fewer: winner must have exactly 10.
 loser at 9 or more: winner must lead by exactly 2 (11-9, 12-10, ...).
+winner has at most 30 points.
 any other combination is invalid.
 a set 3 score is told apart by its winner: 7 or fewer is a regular set, 10 or more a super tiebreak.
 
