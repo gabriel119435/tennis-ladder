@@ -1,3 +1,5 @@
+from conftest import MISSING_ID
+
 SETS = [[6, 4], [6, 3]]
 
 
@@ -8,7 +10,7 @@ def test_matches_carry_player_names(admin_client01, ranking_id):
 
 
 def test_get_matches_not_found(client):
-    res = client.get("/api/rankings/1/matches")
+    res = client.get(f"/api/rankings/{MISSING_ID}/matches")
     assert res.status_code == 404
 
 
@@ -84,7 +86,7 @@ def test_walkover_result(admin_client01, ranking_id):
 def test_invalid_walkover_winner_rejected(admin_client01, ranking_id):
     match_id = admin_client01.get(f"/api/rankings/{ranking_id}/matches").get_json()[0]["id"]
 
-    res = admin_client01.post(f"/api/matches/{match_id}/result", json={"wo_winner_id": 5})
+    res = admin_client01.post(f"/api/matches/{match_id}/result", json={"wo_winner_id": MISSING_ID})
     assert res.status_code == 400
     assert res.get_json() == {"error": "invalid_winner_id"}
 
@@ -143,7 +145,7 @@ def test_create_result_requires_admin(client, admin_client01, ranking_id):
 
 
 def test_create_result_match_not_found(admin_client01):
-    res = admin_client01.post("/api/matches/5/result", json={"sets": SETS})
+    res = admin_client01.post(f"/api/matches/{MISSING_ID}/result", json={"sets": SETS})
     assert res.status_code == 404
 
 

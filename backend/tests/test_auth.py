@@ -94,6 +94,7 @@ def test_create_admin_stores_username_lowercase(client):
 def test_create_admin_duplicate_username_case_insensitive():
     create_admin("duplicate", "admin_pass1")
     assert create_admin("duplicate", "admin_pass2") is False
+    assert create_admin("DUPLICATE", "admin_pass2") is False
 
 
 def test_create_admin_username_too_long():

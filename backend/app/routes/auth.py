@@ -11,6 +11,7 @@ from app.settings import DEFAULT_ADMIN_NAME, DEFAULT_ADMIN_PASS
 
 auth_bp = Blueprint("auth", __name__)
 
+# missing admin still runs password hash check, same response time
 _DUMMY_HASH = generate_password_hash(DEFAULT_ADMIN_PASS)
 
 

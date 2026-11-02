@@ -1,3 +1,9 @@
+from sqlalchemy import delete
+
+from app.db import get_session
+from app.models import Player
+
+
 def test_get_players_requires_admin(client):
     res = client.get("/api/players")
     assert res.status_code == 401
@@ -85,6 +91,19 @@ def test_rename_player_requires_ownership(admin_client02, four_players_admin01):
     res = admin_client02.patch(f"/api/players/{alice_id}", json={"name": "alicia"})
     assert res.status_code == 403
     assert res.get_json() == {"error": "not_owner"}
+
+
+def test_rename_player_taken_name_then_deleted(admin_client01, four_players_admin01):
+    alice_id = four_players_admin01["alice_id"]
+    res = admin_client01.patch(f"/api/players/{alice_id}", json={"name": "bob"})
+    assert res.status_code == 409
+    assert res.get_json() == {"error": "player_exists"}
+
+    with get_session(write=True) as session:
+        session.execute(delete(Player).where(Player.id == alice_id))
+    res = admin_client01.patch(f"/api/players/{alice_id}", json={"name": "alicia"})
+    assert res.status_code == 404
+    assert res.get_json() == {"error": "not_found"}
 
 
 def test_create_player_duplicate_name_allowed_across_different_admins(admin_client02, four_players_admin01):

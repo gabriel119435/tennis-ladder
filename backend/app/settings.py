@@ -3,8 +3,8 @@ import os
 from app.validation import name_error, password_error
 
 # values read once from env vars at import, the fallbacks are known weak defaults for local dev only
-# admin name and password are only used on the startup that creates the default admin, set them before the first one
-# the default admin is found by name: a changed DEFAULT_ADMIN_NAME on an existing db creates a second default admin
+# admin password is only stored on the startup when creating the default admin
+# it also builds _DUMMY_HASH. admin name is read on every login, /api/me and reset
 DEFAULT_ADMIN_NAME = (os.environ.get("DEFAULT_ADMIN_NAME") or "administrador").strip().lower()
 DEFAULT_ADMIN_PASS = os.environ.get("DEFAULT_ADMIN_PASS") or "senha secreta"
 # SEED_RANKING=0 skips the sample ranking that comes with the default admin

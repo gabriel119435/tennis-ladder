@@ -14,6 +14,9 @@ class Base(DeclarativeBase):
 
 DB_URL = os.environ.get("DATABASE_URL", f"sqlite:///{DB_PATH}")
 
+# journal mode delete: commit waits for running selects, "database is locked" after 5s
+
+# in-memory db is per connection, StaticPool shares one across threads
 if DB_URL == "sqlite:///:memory:":
     from sqlalchemy.pool import StaticPool
 
@@ -28,11 +31,13 @@ else:
 
 @event.listens_for(engine, "connect")
 def set_sqlite_pragma(dbapi_conn, _):
+    # sqlite skips fk checks unless enabled per connection
     dbapi_conn.execute("PRAGMA foreign_keys = ON")
 
 
 @event.listens_for(engine, "checkin")
 def reset_query_only(dbapi_conn, _):
+    # every connection goes back to the pool writable, None when invalidated
     if dbapi_conn is not None:
         dbapi_conn.execute("PRAGMA query_only = OFF")
 

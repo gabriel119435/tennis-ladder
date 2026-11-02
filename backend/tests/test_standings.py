@@ -1,4 +1,4 @@
-from conftest import create_ranking, register_participants
+from conftest import MISSING_ID, create_ranking, register_participants
 
 
 def test_standings_reflects_results(admin_client01, ranking_id):
@@ -25,5 +25,5 @@ def test_standings_orders_ties_by_registration(admin_client01, four_players_admi
 
 
 def test_standings_not_found(client):
-    res = client.get("/api/standings/1")
+    res = client.get(f"/api/standings/{MISSING_ID}")
     assert res.status_code == 404

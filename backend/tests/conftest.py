@@ -15,11 +15,15 @@ from app.db import get_session
 from app.models import Admin, Match, Player, Ranking, RankingParticipant, SetScore
 from app.settings import DEFAULT_ADMIN_NAME
 
+# id no test row reaches
+MISSING_ID = 1000
+
 
 # session is the entire test runtime, so once per test run
 @pytest.fixture(scope="session")
 def app():
     app = create_app()
+    # route errors raise instead of 500, pytest shows the traceback
     app.config["TESTING"] = True
     return app
 
@@ -27,6 +31,7 @@ def app():
 # function-scoped so each test starts unauthenticated with a clean cookie jar
 @pytest.fixture
 def client(app):
+    # in process http client, no socket
     return app.test_client()
 
 
