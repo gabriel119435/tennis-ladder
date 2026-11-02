@@ -14,7 +14,7 @@ LAST_NAMES = [
     "sousa", "gomes", "nascimento", "araújo", "ribeiro", "almeida", "jesus", "barbosa", "soares", "carvalho",
 ]
 # fmt: on
-DEFAULT_RANKING_NAME = "ranking de amostra"
+DEFAULT_RANKING_NAME = "ranking de teste"
 ROUNDS = 15
 # rng.choice needs a list, sorted keeps deterministic order from unordered set
 SET_SCORES = sorted(VALID_SET_SCORES)

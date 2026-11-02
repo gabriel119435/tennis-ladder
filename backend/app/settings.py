@@ -6,7 +6,7 @@ from app.validation import name_error, password_error
 # admin password is only stored on the startup when creating the default admin
 # it also builds _DUMMY_HASH. admin name is read on every login, /api/me and reset
 DEFAULT_ADMIN_NAME = os.environ.get("DEFAULT_ADMIN_NAME") or "admin"
-DEFAULT_ADMIN_PASS = os.environ.get("DEFAULT_ADMIN_PASS") or "admin_pass"
+DEFAULT_ADMIN_PASS = os.environ.get("DEFAULT_ADMIN_PASS") or "admin pass"
 # DEFAULT_ADMIN_SEED_RANKING=0 skips the sample ranking that comes with the default admin
 DEFAULT_ADMIN_SEED_RANKING = (os.environ.get("DEFAULT_ADMIN_SEED_RANKING") or "1") == "1"
 

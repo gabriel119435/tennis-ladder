@@ -2,6 +2,10 @@
 
 tennis ladder rankings: every round pairs each active player with 2 nearby opponents, points add up forever
 
+![desktop matches](screenshot_desktop_matches.png)
+
+![mobile standings](screenshot_mobile_standings.png)
+
 ## stack
 
 - **backend**: python, flask, flask-login, sqlalchemy, sqlite; pytest for tests
@@ -51,7 +55,7 @@ an unset or empty var falls back to its default below.
 | `SECRET_KEY`                 | `dev-default-value` | flask session signing                                      |
 | `SESSION_COOKIE_SECURE`      | `0`                 | `1` sends the session cookie only over https               |
 | `DEFAULT_ADMIN_NAME`         | `admin`             | default admin username, the only one with the reset button |
-| `DEFAULT_ADMIN_PASS`         | `admin_pass`        | default admin password (set on first run)                  |
+| `DEFAULT_ADMIN_PASS`         | `admin pass`        | default admin password (set on first run)                  |
 | `DEFAULT_ADMIN_SEED_RANKING` | `1`                 | `0` skips the default admin's sample ranking               |
 | `FLASK_HOST`                 | `127.0.0.1`         | flask bind address; set to `0.0.0.0` in docker via compose |
 | `FLASK_DEBUG`                | `1`                 | reloader and debugger; set to `0` in docker via compose    |
