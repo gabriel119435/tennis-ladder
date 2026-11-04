@@ -133,3 +133,21 @@ watch(
     <span v-if="rows?.length === 0">{{ t('standings.empty') }}</span>
   </div>
 </template>
+
+<style scoped>
+.cell-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-3);
+}
+
+/* .c1 > *: every direct c1's child */
+.cell-grid > * {
+  background: var(--color-bg-2);
+  border: var(--border-width) solid var(--color-b-1);
+  border-radius: var(--border-radius-0);
+  padding: var(--space-1) var(--space-3);
+  display: flex;
+  justify-content: space-between;
+}
+</style>

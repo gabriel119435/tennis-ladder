@@ -69,3 +69,15 @@ const columns = computed(() => ['', t('matches.set_1'), t('matches.set_2'), t('m
     </div>
   </div>
 </template>
+
+<style scoped>
+/* :deep: style also reaches child components' non root tags */
+.match-table th,
+.match-table :deep(td) {
+  padding: var(--space-1) var(--space-2);
+}
+
+.set-column {
+  width: var(--width-set-column);
+}
+</style>

@@ -1,4 +1,4 @@
-/* inputs, consistent with button sizing and palette, the picker in select.css matches them */
+/* inputs, consistent with button sizing and palette, the picker in AppSelect.vue matches them */
 input {
     font-family: inherit;
     font-size: var(--font-0);

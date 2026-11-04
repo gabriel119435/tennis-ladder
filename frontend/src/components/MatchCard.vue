@@ -27,7 +27,7 @@ const {pending, filled, nameTag, absentOptions, sides, body, absentId, scores} =
 // set labels, the header row of the score grid
 const labels = computed(() => [t('matches.set_1'), t('matches.set_2'), t('matches.set_3')])
 
-// which of the 3 layouts the card uses, see match-card.css
+// which of the 3 layouts the card uses, see style below
 // games: name and 3 sets, owner's pending or played match
 // wo: name and wo text, walkover or no-match
 // names: name only, read only pending match
@@ -119,3 +119,24 @@ const layout = computed(() => {
     </div>
   </div>
 </template>
+
+<style scoped>
+/* name column takes the free width + 3 set columns of fixed width */
+.match-sets {
+  display: grid;
+  grid-template-columns: 1fr repeat(3, var(--width-set-column-card));
+  gap: var(--space-1);
+  align-items: center;
+  justify-items: center;
+}
+
+/* wo column width = 3 set columns + 2 gaps between them */
+.match-sets-wo {
+  grid-template-columns: 1fr calc(3 * var(--width-set-column-card) + 2 * var(--space-1));
+}
+
+/* one column, names centered */
+.match-sets-names {
+  grid-template-columns: 1fr;
+}
+</style>

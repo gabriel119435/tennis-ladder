@@ -56,15 +56,13 @@ each new file builds on what came before, read them in order for the most cohere
     - `src/router/index.js`: routes, the session check, admin-only pages, the catch-all redirect.
     - `src/App.vue`: top bar, current page, toast and tab title.
     - `src/main.js`: creates the app, router, i18n, `v-click-outside`, the session lost handler for a 401.
-- **styles**: global css, itcss layers from generic to specific
+- **styles**: shared css as global itcss layers, from generic to specific
     - `src/style.css`: imports every layer in order, each one overrides the ones above.
     - `styles/settings/variables.css`: palette, colors, spacing, fonts and other tokens.
     - `styles/generic/reset.css`: removes browser defaults, base font and colors.
     - `styles/elements/`: bare `button`, `input`, `table` and `hr`, plus primary, danger and toggle buttons.
-    - `styles/layout/structure.css`: page padding, page column, shared card, card row, tile, split tile, cell grid.
-    - `styles/components/`: top bar, toast, name form, select, match card.
-    - `styles/views/login.css`: the centered login card.
-    - `styles/overrides/mobile.css`: top bar rows, 2 column tabs, full width cards, stacked split tiles, table padding.
+    - `styles/layout/structure.css`: page padding, page column, shared card, card wrap, tile.
+    - `styles/overrides/mobile.css`: full width cards, mobile-only and desktop-only, table padding.
 - **tests**: next to the file they test
     - `src/utils/scoreUtils.test.js`: digits only become an int, anything else stays as typed.
     - `src/composables/generic/useStaleGuard.test.js`: newer call wins over an older one.

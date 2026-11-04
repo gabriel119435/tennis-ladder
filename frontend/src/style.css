@@ -1,5 +1,5 @@
-/* all styles are global, following itcss (inverted triangle css): each layer below overrides the ones above
-   class names are specific enough to avoid accidental collisions */
+/* shared styles, global, following itcss (inverted triangle css): each layer below overrides the ones above
+   single-owner css lives in its vue file's <style scoped> */
 
 /* settings */
 @import './styles/settings/variables.css';
@@ -15,16 +15,6 @@
 
 /* layout */
 @import './styles/layout/structure.css';
-
-/* components */
-@import './styles/components/top-bar.css';
-@import './styles/components/toast.css';
-@import './styles/components/name-form.css';
-@import './styles/components/select.css';
-@import './styles/components/match-card.css';
-
-/* views */
-@import './styles/views/login.css';
 
 /* overrides */
 @import './styles/overrides/mobile.css';

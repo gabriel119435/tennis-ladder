@@ -12,8 +12,7 @@ const {t} = useI18n()
 const {locked, withLock} = useButtonLock()
 const {submit} = useSubmit(withLock)
 
-// js can't delete the http only session cookie, only the backend logout call can
-// if that call fails, the user stays logged in and the toast shows the error
+// if logout fails, the user stays logged in and the toast shows the error
 function handleLogout() {
   return submit(logout, async () => {
     store.user = null
@@ -21,7 +20,7 @@ function handleLogout() {
   })
 }
 
-// an open tab links to the current url, so clicking it keeps its /:id, ex: /standings/3 stays /standings/3
+// keep path params when clicked tab is current one
 function tabLink(path) {
   return route.path.startsWith(path) ? route.fullPath : path
 }
@@ -64,3 +63,64 @@ function tabLink(path) {
     </div>
   </nav>
 </template>
+
+<style scoped>
+.top-bar {
+  display: grid;
+  /* tabs keep their content width (auto), sides split the leftover in half (1fr each) */
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  background: var(--color-bg-1);
+  border-bottom: var(--border-width) solid var(--color-b-0);
+  padding: var(--space-3) var(--space-5);
+  margin-bottom: var(--space-5);
+}
+
+.top-bar-left {
+  justify-self: start;
+  color: var(--color-fg-1);
+}
+
+.top-bar-right {
+  justify-self: end;
+}
+
+.top-bar-links {
+  display: flex;
+  gap: var(--space-1);
+}
+
+/* a (html link tag) rendered by vue's RouterLink */
+.top-bar a {
+  text-decoration: none;
+  color: var(--color-fg-1);
+  padding: var(--space-1) var(--space-3);
+  border: var(--border-width) solid var(--color-b-1);
+  border-radius: var(--border-radius-0);
+}
+
+/* router-link-active: vue router's class for the current page's link */
+.top-bar a:hover,
+.top-bar a.router-link-active {
+  background: var(--color-bg-2);
+  border-color: var(--color-b-2);
+  color: var(--color-fg-0);
+}
+
+@media (max-width: 800px) {
+  /* row 1: user logout
+     row 2: tabs */
+  .top-bar {
+    grid-template-columns: 1fr 1fr;
+    row-gap: var(--space-3);
+  }
+
+  /* row 2, full width: tabs in 2 columns, each tab fills its half */
+  .top-bar-links {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+}
+</style>

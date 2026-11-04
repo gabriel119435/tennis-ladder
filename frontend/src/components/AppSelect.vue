@@ -2,61 +2,45 @@
 import {computed, nextTick, ref} from 'vue'
 import {useI18n} from 'vue-i18n'
 
-// custom select: a trigger button opens a list of option buttons, the picked value goes to the parent's v-model
 const props = defineProps({
-  // [{value: 3, label: 'text shown'}], [] while the parent's list is still loading
+  // [{value: 3, label: 'text shown'}], empty while loading
   options: {type: Array, default: () => []},
-  // shown while nothing is picked
   placeholder: {type: String, default: ''},
-  // last list entry that empties the pick instead of being an option
   clearLabel: {type: String, default: ''},
 })
 
-// the parent's v-model, undefined while nothing is picked
 const model = defineModel({type: Number})
-
 const {t} = useI18n()
 
-// whether the option list is visible
 const open = ref(false)
 // list opens above the trigger when it doesn't fit below
 const up = ref(false)
-// keyboard and hover highlighted entry, an index into entries
+// index of keyboard|hover highlighted entry
 const highlighted = ref(0)
 
-// root (wraps the trigger) and list (the open options) are measured for the flip
-// vue fills each one with its element from the same named ref="..." in the template
-const root = ref()
+// select and list are measured for the flip. vue fills them with ref in template
+const select = ref()
 const list = ref()
 
-// undefined while nothing is picked, shows the placeholder
 const selected = computed(() => props.options.find((o) => o.value === model.value))
-
-// trigger text: the picked option's label or the placeholder
 const shown = computed(() => (selected.value ? selected.value.label : props.placeholder))
-
-// every label the trigger can show, stacked to size it to the widest
-const labels = computed(() => [props.placeholder, ...props.options.map((o) => o.label)])
-
-// options plus the clear entry at the end, its undefined value empties the pick
-const entries = computed(() =>
+const allLabels = computed(() => [props.placeholder, ...props.options.map((o) => o.label)])
+const allOptions = computed(() =>
   props.clearLabel ? [...props.options, {value: undefined, label: props.clearLabel}] : props.options,
 )
 
+// opens above only when list doesn't fit below and above has more room
 async function show() {
   open.value = true
-  // starts on the picked option, the first one while nothing is picked
   highlighted.value = Math.max(0, props.options.indexOf(selected.value))
-  // the list exists only after the next render, then its height can be measured
   await nextTick()
 
-  // flips when the list doesn't fit below the trigger and there's more room above
-  // getBoundingClientRect: the trigger's position in px from the window's top edge
-  const trigger = root.value.getBoundingClientRect()
+  // getBoundingClientRect: position in px from top
   // innerHeight: visible window height in px
-  const freeSpaceBelowTrigger = window.innerHeight - trigger.bottom
-  // offsetHeight: the list's rendered height in px, padding and border included
-  up.value = list.value.offsetHeight > freeSpaceBelowTrigger && trigger.top > freeSpaceBelowTrigger
+  // offsetHeight: rendered height in px
+  const selectRect = select.value.getBoundingClientRect()
+  const spaceBelowTrigger = window.innerHeight - selectRect.bottom
+  up.value = list.value.offsetHeight > spaceBelowTrigger && selectRect.top > spaceBelowTrigger
 }
 
 function close() {
@@ -68,8 +52,6 @@ function pick(value) {
   close()
 }
 
-// enter and space on the focused trigger fire a native click, its @click opens or closes the list
-// while closed, down opens, while open, up and down move the highlight wrapping at the ends, enter picks, esc closes
 function onKeydown(e) {
   if (!open.value) {
     if (e.key === 'ArrowDown') {
@@ -84,23 +66,19 @@ function onKeydown(e) {
     return
   }
 
-  // empty list: nothing to move to or pick
-  if (!entries.value.length) return
+  if (!allOptions.value.length) return
 
   if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
-    // stops the page from scrolling with the arrows
     e.preventDefault()
     const step = e.key === 'ArrowDown' ? 1 : -1
-    highlighted.value = (highlighted.value + step + entries.value.length) % entries.value.length
+    highlighted.value = (highlighted.value + step + allOptions.value.length) % allOptions.value.length
   } else if (e.key === 'Enter') {
-    // stops the native trigger click, it would reopen the list
     e.preventDefault()
-    pick(entries.value[highlighted.value].value)
+    pick(allOptions.value[highlighted.value].value)
   }
 }
 
-// tab away: focus moved to an element outside the select, close the list
-// null target is a mouse click, left to v-click-outside so a click on an option still picks it
+// currentTarget: this element. relatedTarget: element getting focus
 function onFocusOut(e) {
   if (e.relatedTarget && !e.currentTarget.contains(e.relatedTarget)) close()
 }
@@ -108,7 +86,7 @@ function onFocusOut(e) {
 
 <template>
   <div
-    ref="root"
+    ref="select"
     v-click-outside="close"
     class="app-select"
     @focusout="onFocusOut"
@@ -124,15 +102,14 @@ function onFocusOut(e) {
         :class="{'app-select-placeholder': !selected}"
         class="toggle-button"
       >
-        <!-- one span per label, only the shown one visible -->
         <span
-          v-for="(label, i) in labels"
+          v-for="(label, i) in allLabels"
           :key="i"
           :class="{hidden: label !== shown}"
           >{{ label }}</span
         >
       </span>
-      <span class="app-select-arrow">&#9662;</span>
+      <span>&#9662;</span>
     </button>
     <div
       v-if="open"
@@ -140,18 +117,17 @@ function onFocusOut(e) {
       :class="{up}"
       class="app-select-list"
     >
-      <!-- no entries: one disabled entry says so, nothing to pick -->
       <button
-        v-if="!entries.length"
+        v-if="!allOptions.length"
         class="app-select-option"
         disabled
         type="button"
       >
         {{ t('select.empty') }}
       </button>
-      <!-- tabindex -1: tab skips the options, focus stays on the trigger -->
+      <!-- tabindex -1: tab moves away from select, not within the list -->
       <button
-        v-for="(entry, i) in entries"
+        v-for="(entry, i) in allOptions"
         :key="i"
         :class="{active: i === highlighted}"
         class="app-select-option"
@@ -165,3 +141,71 @@ function onFocusOut(e) {
     </div>
   </div>
 </template>
+
+<style scoped>
+.app-select {
+  /* relative: .app-select-list's reference point */
+  position: relative;
+  display: inline-block;
+}
+
+.app-select-trigger {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  background: var(--color-bg-2);
+  border: var(--border-width) solid var(--color-b-1);
+  color: inherit;
+}
+
+.app-select-trigger.open,
+.app-select-trigger:hover {
+  border-color: var(--color-b-2);
+  box-shadow: var(--shadow);
+}
+
+/* .c1 > .c2: c2 directly inside c1 */
+.toggle-button > .hidden {
+  height: 0;
+}
+
+.app-select-placeholder {
+  color: var(--color-fg-1);
+}
+
+.app-select-list {
+  /* absolute: top and left measured from closest parent with position set, .app-select */
+  position: absolute;
+  top: calc(100% + var(--space-1));
+  /* horizontal centering */
+  left: var(--center);
+  transform: translateX(var(--center-neg));
+  min-width: 100%;
+  width: max-content;
+  max-width: calc(100vw - 2 * var(--space-2));
+  background: var(--color-bg-2);
+  border: var(--border-width) solid var(--color-b-1);
+  border-radius: var(--border-radius-0);
+  box-shadow: var(--shadow);
+  z-index: var(--z-index-0);
+  /* keeps rectangular highlights inside rounded list */
+  overflow: hidden;
+}
+
+.app-select-list.up {
+  top: auto;
+  bottom: calc(100% + var(--space-1));
+}
+
+.app-select-option {
+  display: block;
+  width: 100%;
+  background: transparent;
+  color: inherit;
+  border-radius: 0;
+}
+
+.app-select-option.active {
+  background: var(--color-bg-3);
+}
+</style>

@@ -3,6 +3,7 @@ import {useI18n} from 'vue-i18n'
 import AppSelect from './AppSelect.vue'
 import {useMatchResult} from '../composables/matches/useMatchResult.js'
 
+// one match as 2 table rows: the desktop layout
 const props = defineProps({
   // {
   //   id: 1, player_a_id: 10, player_a_name: 'player name', player_b_id: 20, player_b_name: 'player name',
@@ -83,3 +84,16 @@ const {pending, filled, nameTag, absentOptions, sides, body, absentId, scores} =
     </td>
   </tr>
 </template>
+
+<style scoped>
+/* .c1 > .c2:not([foo]): c2 without foo attribute directly inside c1 */
+.match-top > td:not([rowspan]) {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+/* .c1 + .c2: c2 right after c1, same parent */
+.match-top + tr > td {
+  padding-top: var(--space-1);
+}
+</style>

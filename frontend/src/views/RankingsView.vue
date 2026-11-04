@@ -162,3 +162,27 @@ function handleRemove(participant) {
     </template>
   </div>
 </template>
+
+<style scoped>
+.card-row {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.card.tile-split {
+  display: grid;
+  grid-template-columns: 1fr var(--width-tile-action);
+  align-items: center;
+  justify-items: center;
+  gap: var(--space-2);
+}
+
+@media (max-width: 800px) {
+  .card.tile-split {
+    grid-template-columns: 1fr;
+  }
+}
+</style>

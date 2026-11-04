@@ -59,3 +59,32 @@ async function handleSubmit() {
     </div>
   </div>
 </template>
+
+<style scoped>
+.login-page {
+  flex: 1;
+  display: flex;
+}
+
+.login-card {
+  margin: auto;
+  gap: var(--space-5);
+  width: auto;
+}
+
+.login-card h1 {
+  font-size: var(--font-scale-1);
+}
+
+.login-card form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.login-card button {
+  width: var(--width-input-text);
+  margin-top: var(--space-1);
+}
+</style>

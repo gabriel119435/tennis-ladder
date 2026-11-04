@@ -112,3 +112,10 @@ async function handleClear(match) {
     </template>
   </div>
 </template>
+
+<style scoped>
+/* card width = widest name + 2 card paddings + 2 card borders */
+.match-names-card {
+  width: calc(var(--width-input-text) + 2 * var(--space-3) + 2 * var(--border-width));
+}
+</style>

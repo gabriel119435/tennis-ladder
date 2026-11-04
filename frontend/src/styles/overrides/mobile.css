@@ -1,20 +1,10 @@
+/* hidden by default, @media below shows it */
+.mobile-only {
+    display: none;
+}
+
 /* var() can't be used here, the browser resolves @media before the cascade */
 @media (max-width: 800px) {
-    /* row 1: username | logout
-       row 2: tabs */
-    .top-bar {
-        grid-template-columns: 1fr 1fr;
-        row-gap: var(--space-3);
-    }
-
-    /* full width second row: tabs in 2 columns, 2 rows when logged in, each tab fills its half, label centered */
-    .top-bar-links {
-        grid-column: 1 / -1;
-        grid-row: 2;
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-    }
-
     /* side padding: space-2, narrow screens keep most of their width for the cards */
     .page {
         padding: 0 var(--space-2) var(--space-5);
@@ -23,11 +13,6 @@
     /* one full width card per line */
     .card {
         width: 100%;
-    }
-
-    /* split tiles stack: the 16em input or picker and the button column don't fit side by side on a phone */
-    .card.tile-split {
-        grid-template-columns: 1fr;
     }
 
     /* cards stacked one per line already read as one list, no separator needed */

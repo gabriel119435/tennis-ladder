@@ -36,3 +36,12 @@ const model = defineModel({type: String})
     </button>
   </form>
 </template>
+
+<style scoped>
+.name-form {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  gap: var(--space-3);
+}
+</style>

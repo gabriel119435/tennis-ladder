@@ -1,4 +1,4 @@
-/* app root: the top bar, then the page filling the rest of the screen, so a page can center in it, see login.css */
+/* app root: the top bar, then the page filling the rest of the screen, so a page can center in it, see LoginView.vue */
 #app {
     display: flex;
     flex-direction: column;
@@ -49,27 +49,6 @@
     width: 100%;
 }
 
-/* items spread edge to edge, vertically centered
-   after .card so row wins over its column on a "card card-row" element */
-.card-row {
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
-    gap: var(--space-1);
-}
-
-/* 2 columns: the tile's item, then its button, each centered in its column, ex: rankings create, round, add player
-   one fixed button column on every tile, so items and buttons line up across tiles, mobile.css stacks them
-   .card.tile-split: name-form.css loads later, the extra class wins over its flex row */
-.card.tile-split {
-    display: grid;
-    grid-template-columns: 1fr var(--width-tile-action);
-    align-items: center;
-    justify-items: center;
-    gap: var(--space-2);
-}
-
 /* one width on desktop, so every tile in a list lines up, mobile.css makes cards full width */
 .tile {
     width: var(--width-tile);
@@ -78,21 +57,4 @@
 /* one button size across tiles, a label wider on another os font grows its own button instead of overflowing */
 .tile button {
     min-width: var(--width-tile-button);
-}
-
-/* boxed text cells, 2 per line, one level below the card, ex: standings details on mobile */
-.cell-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: var(--space-3);
-}
-
-.cell-grid > * {
-    background: var(--color-bg-2);
-    border: var(--border-width) solid var(--color-b-1);
-    border-radius: var(--border-radius-0);
-    padding: var(--space-1) var(--space-3);
-    /* label at the left, value at the right, the padding at both ends, the free width between them */
-    display: flex;
-    justify-content: space-between;
 }
